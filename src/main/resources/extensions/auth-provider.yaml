@@ -1,0 +1,17 @@
+apiVersion: auth.halo.run/v1alpha1
+kind: AuthProvider
+metadata:
+  name: github
+spec:
+  displayName: GitHub
+  description: GitHub Inc. is a web-based hosting service for version control using Git.
+  logo: https://avatars.githubusercontent.com/u/9919?s=200&v=4
+  website: https://github.com
+  helpPage: https://docs.github.com/en/apps/oauth-apps/building-oauth-apps/creating-an-oauth-app
+  authenticationUrl: /oauth2/authorization/github
+  settingRef:
+    name: generic-oauth-setting
+    group: genericOauth
+  configMapKeyRef:
+    name: generic-oauth-configmap
+    key: github
