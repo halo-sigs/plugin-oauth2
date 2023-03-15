@@ -11,12 +11,14 @@ import org.apache.commons.lang3.BooleanUtils;
 import org.springdoc.webflux.core.fn.SpringdocRouteBuilder;
 import org.springframework.http.MediaType;
 import org.springframework.stereotype.Component;
+import org.springframework.web.reactive.function.server.RequestPredicates;
 import org.springframework.web.reactive.function.server.RouterFunction;
 import org.springframework.web.reactive.function.server.ServerRequest;
 import org.springframework.web.reactive.function.server.ServerResponse;
 import org.springframework.web.util.UriComponentsBuilder;
 import reactor.core.publisher.Mono;
 import run.halo.app.core.extension.endpoint.CustomEndpoint;
+import run.halo.app.extension.GroupVersion;
 
 /**
  * User connection endpoint.
@@ -29,10 +31,19 @@ import run.halo.app.core.extension.endpoint.CustomEndpoint;
 public class UserConnectionEndpoint implements CustomEndpoint {
 
     private final UserConnectionService userConnectionService;
+    private final String tag = "api.plugin.halo.run/v1alpha1/Connection";
 
     @Override
     public RouterFunction<ServerResponse> endpoint() {
-        final var tag = "api.console.halo.run/v1alpha1/Connection";
+        return SpringdocRouteBuilder.route()
+            .nest(RequestPredicates.path("/plugins/plugin-oauth-github"), this::nested,
+                builder -> builder.operationId("PluginOauthGithubEndpoints")
+                    .description("Plugin OAuth GitHub Endpoints").tag(tag)
+            )
+            .build();
+    }
+
+    RouterFunction<ServerResponse> nested() {
         return SpringdocRouteBuilder.route()
             .GET("/connect/{registrationId}", this::connect,
                 builder -> builder.operationId("Connect")
@@ -52,6 +63,11 @@ public class UserConnectionEndpoint implements CustomEndpoint {
                     )
             )
             .build();
+    }
+
+    @Override
+    public GroupVersion groupVersion() {
+        return GroupVersion.parseAPIVersion("api.plugin.halo.run/v1alpha1");
     }
 
     Mono<ServerResponse> connect(ServerRequest request) {
