@@ -12,6 +12,8 @@ import org.mockito.InjectMocks;
 import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
 import org.springframework.security.authentication.ProviderNotFoundException;
+import org.springframework.security.config.oauth2.client.CommonOAuth2Provider;
+import org.springframework.security.oauth2.client.registration.ClientRegistration;
 import reactor.core.publisher.Mono;
 import reactor.test.StepVerifier;
 import run.halo.app.core.extension.AuthProvider;
@@ -41,9 +43,16 @@ class OauthClientRegistrationRepositoryTest {
         authProvider.getSpec().setDisplayName("GitHub");
         authProvider.getSpec().setEnabled(true);
         authProvider.getSpec().setAuthenticationUrl("/oauth2/authorization/github");
-        authProvider.getSpec().setConfigMapKeyRef(new AuthProvider.ConfigMapKeyRef());
-        authProvider.getSpec().getConfigMapKeyRef().setKey("github");
-        authProvider.getSpec().getConfigMapKeyRef().setName("oauth-github-config");
+        authProvider.getSpec().setSettingRef(new AuthProvider.SettingRef());
+        authProvider.getSpec().getSettingRef().setName("oauth-github-setting");
+        authProvider.getSpec().getSettingRef().setGroup("github");
+        authProvider.getSpec().setConfigMapRef(new AuthProvider.ConfigMapRef());
+        authProvider.getSpec().getConfigMapRef().setName("oauth-github-config");
+
+        authProvider.getSpec().setClientRegistration(new AuthProvider.ClientRegistration());
+        authProvider.getSpec().getClientRegistration().setAuthorizationUri("fake-uri");
+        authProvider.getSpec().getClientRegistration().setTokenUri("fake-token-uri");
+
         when(client.fetch(eq(AuthProvider.class), eq("github")))
             .thenReturn(Mono.just(authProvider));
 
@@ -65,6 +74,8 @@ class OauthClientRegistrationRepositoryTest {
 
     @Test
     void findByRegistrationId_withUnsupportedProvider_throwsProviderNotFoundException() {
+        when(client.fetch(eq(AuthProvider.class), eq("unsupported-provider")))
+            .thenReturn(Mono.empty());
         assertThatThrownBy(() -> repository.findByRegistrationId("unsupported-provider").block())
             .isInstanceOf(ProviderNotFoundException.class)
             .hasMessage("Unsupported OAuth2 provider: unsupported-provider");
