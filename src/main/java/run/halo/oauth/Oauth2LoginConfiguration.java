@@ -215,7 +215,7 @@ public final class Oauth2LoginConfiguration {
         }
 
         ReactiveOAuth2AuthorizedClientService getAuthorizedClientService() {
-            return new InMemoryReactiveOAuth2AuthorizedClientService(
+            return new DefaultOAuth2AuthorizedClientService(extensionClient,
                 getClientRegistrationRepository());
         }
     }
