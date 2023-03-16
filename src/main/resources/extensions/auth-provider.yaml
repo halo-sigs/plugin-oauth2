@@ -9,9 +9,18 @@ spec:
   website: https://github.com
   helpPage: https://docs.github.com/en/apps/oauth-apps/building-oauth-apps/creating-an-oauth-app
   authenticationUrl: /oauth2/authorization/github
+  clientRegistration:
+    clientAuthenticationMethod: "client_secret_basic"
+    authorizationGrantType: "authorization_code"
+    redirectUri: "{baseUrl}/login/oauth2/code/{registrationId}"
+    scope: "read:user"
+    authorizationUri: "https://github.com/login/oauth/authorize"
+    tokenUri: "https://github.com/login/oauth/access_token"
+    userInfoUri: "https://api.github.com/user"
+    userNameAttributeName: "id"
+    clientName: "GitHub"
   settingRef:
     name: generic-oauth-setting
     group: genericOauth
-  configMapKeyRef:
-    name: generic-oauth-configmap
-    key: github
+  configMapRef:
+    name: oauth-github-config
