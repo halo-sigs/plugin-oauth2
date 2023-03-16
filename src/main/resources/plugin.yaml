@@ -9,9 +9,9 @@ spec:
   author:
     name: Halo OSS Team
     website: https://github.com/halo-dev
-  logo: https://halo.run/logo
+  logo: logo.svg
   homepage: https://github.com/halo-sigs/plugin-oauth-github
-  displayName: "GitHub Oauth 认证"
-  description: "允许你使用 GitHub 账号登录"
+  displayName: "GitHub OAuth 认证"
+  description: "提供 GitHub OAuth 认证方式"
   license:
     - name: "MIT"
