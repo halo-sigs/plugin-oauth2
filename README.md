@@ -1,6 +1,6 @@
-# plugin-oauth-github
+# plugin-starter
 
-Halo 2.0 的 GitHub 第三方登录插件。
+Halo 2.0 插件开发快速开始模板。
 
 ## 开发环境
 
@@ -43,13 +43,3 @@ halo:
     fixedPluginPath:
       - "/path/to/plugin-starter"
 ```
-
-## 如何使用
-
-1. 安装此插件
-2. 前往 GitHub [创建 OAuth App](https://docs.github.com/en/apps/oauth-apps/building-oauth-apps/creating-an-oauth-app)
-   ，填写相关
-   信息，并将 `Authorization callback URL` 的值填写为 `https://{your-domain}/login/oauth2/code/github`。
-   如果是本地测试填写为 `http://127.0.0.1/login/oauth2/code/github` ，不能是 `localhost`
-   ，参考： [authorizing-oauth-apps](https://docs.github.com/en/apps/oauth-apps/building-oauth-apps/authorizing-oauth-apps)。
-3. 填写 Client ID 和 Client Secret
