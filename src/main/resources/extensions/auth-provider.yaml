@@ -1,0 +1,31 @@
+apiVersion: auth.halo.run/v1alpha1
+kind: AuthProvider
+metadata:
+  name: github
+spec:
+  displayName: GitHub
+  enabled: true
+  description: GitHub Inc. is a web-based hosting service for version control using Git.
+  logo: https://avatars.githubusercontent.com/u/9919?s=200&v=4
+  website: https://github.com
+  helpPage: https://docs.github.com/en/apps/oauth-apps/building-oauth-apps/creating-an-oauth-app
+  authenticationUrl: /oauth2/authorization/github
+  bindingUrl: /apis/api.plugin.halo.run/v1alpha1/plugins/plugin-oauth-github/connect/github
+  unbindUrl: /apis/api.plugin.halo.run/v1alpha1/plugins/plugin-oauth-github/disconnect/github
+  clientRegistration:
+    clientAuthenticationMethod: "client_secret_basic"
+    authorizationGrantType: "authorization_code"
+    redirectUri: "{baseUrl}/login/oauth2/code/github"
+    scopes:
+      - "read:user"
+    authorizationUri: "https://github.com/login/oauth/authorize"
+    tokenUri: "https://github.com/login/oauth/access_token"
+    userInfoUri: "https://api.github.com/user"
+    userInfoAuthenticationMethod: "header"
+    userNameAttributeName: "id"
+    clientName: "GitHub"
+  settingRef:
+    name: generic-oauth-setting
+    group: genericOauth
+  configMapRef:
+    name: oauth-github-config
