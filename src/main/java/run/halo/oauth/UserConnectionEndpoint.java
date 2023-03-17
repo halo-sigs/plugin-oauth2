@@ -6,6 +6,7 @@ import static org.springdoc.core.fn.builders.parameter.Builder.parameterBuilder;
 import io.swagger.v3.oas.annotations.enums.ParameterIn;
 import java.net.URI;
 import java.util.Map;
+import java.util.Optional;
 import lombok.RequiredArgsConstructor;
 import org.apache.commons.lang3.BooleanUtils;
 import org.springdoc.webflux.core.fn.SpringdocRouteBuilder;
@@ -72,8 +73,7 @@ public class UserConnectionEndpoint implements CustomEndpoint {
     }
 
     Mono<ServerResponse> connect(ServerRequest request) {
-        String registrationId = request.pathVariable("registrationId");
-        return ServerResponse.temporaryRedirect(buildOauthRedirectUri(registrationId))
+        return ServerResponse.temporaryRedirect(buildOauthRedirectUri(request))
             .build();
     }
 
@@ -86,11 +86,14 @@ public class UserConnectionEndpoint implements CustomEndpoint {
             );
     }
 
-    URI buildOauthRedirectUri(String registrationId) {
+    URI buildOauthRedirectUri(ServerRequest request) {
+        String registrationId = request.pathVariable("registrationId");
+        Optional<String> redirectUri = request.queryParam("redirect_uri");
         return UriComponentsBuilder.fromPath("/oauth2/authorization/{registrationId}")
             .uriVariables(Map.of("registrationId", registrationId))
             .queryParam(SocialServerOauth2AuthorizationRequestResolver.SOCIAL_CONNECTION,
                 BooleanUtils.TRUE)
+            .queryParamIfPresent("binding_redirect_uri", redirectUri)
             .build()
             .toUri();
     }

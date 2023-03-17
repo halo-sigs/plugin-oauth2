@@ -2,6 +2,7 @@ package run.halo.oauth;
 
 import static run.halo.oauth.SocialServerOauth2AuthorizationRequestResolver.SOCIAL_CONNECTION;
 
+import org.apache.commons.lang3.StringUtils;
 import org.springframework.lang.NonNull;
 import org.springframework.security.authentication.ReactiveAuthenticationManager;
 import org.springframework.security.authentication.UsernamePasswordAuthenticationToken;
@@ -16,6 +17,7 @@ import org.springframework.security.oauth2.client.web.server.ServerOAuth2Authori
 import org.springframework.security.oauth2.client.web.server.authentication.OAuth2LoginAuthenticationWebFilter;
 import org.springframework.security.web.server.WebFilterExchange;
 import org.springframework.security.web.server.authentication.AuthenticationWebFilter;
+import org.springframework.security.web.server.authentication.RedirectServerAuthenticationSuccessHandler;
 import org.springframework.security.web.server.authentication.ServerAuthenticationSuccessHandler;
 import org.springframework.security.web.server.context.ServerSecurityContextRepository;
 import org.springframework.stereotype.Component;
@@ -41,9 +43,9 @@ public class Oauth2Authenticator implements AdditionalWebFilter {
     private final UserConnectionService userConnectionService;
 
     public Oauth2Authenticator(Oauth2LoginConfiguration oauth2LoginConfiguration,
-        ServerSecurityContextRepository securityContextRepository,
-        SocialUserDetailsService socialUserDetailsService,
-        UserConnectionService userConnectionService) {
+                               ServerSecurityContextRepository securityContextRepository,
+                               SocialUserDetailsService socialUserDetailsService,
+                               UserConnectionService userConnectionService) {
         this.oauth2LoginConfiguration = oauth2LoginConfiguration;
         this.securityContextRepository = securityContextRepository;
         this.socialUserDetailsService = socialUserDetailsService;
@@ -92,7 +94,7 @@ public class Oauth2Authenticator implements AdditionalWebFilter {
         /**
          * Creates an instance.
          *
-         * @param authenticationManager the authentication manager to use
+         * @param authenticationManager      the authentication manager to use
          * @param authorizedClientRepository optional authorized client repository to use
          */
         public SocialLoginAuthenticationWebFilter(
@@ -106,7 +108,7 @@ public class Oauth2Authenticator implements AdditionalWebFilter {
 
         @Override
         protected Mono<Void> onAuthenticationSuccess(Authentication authentication,
-            WebFilterExchange webFilterExchange) {
+                                                     WebFilterExchange webFilterExchange) {
             OAuth2LoginAuthenticationToken authenticationResult =
                 (OAuth2LoginAuthenticationToken) authentication;
             OAuth2AuthorizedClient authorizedClient = new OAuth2AuthorizedClient(
@@ -132,7 +134,7 @@ public class Oauth2Authenticator implements AdditionalWebFilter {
         }
 
         private Mono<Void> createConnection(WebFilterExchange webFilterExchange,
-            OAuth2LoginAuthenticationToken authenticationToken) {
+                                            OAuth2LoginAuthenticationToken authenticationToken) {
             return securityContextRepository.load(webFilterExchange.getExchange())
                 .map(SecurityContext::getAuthentication)
                 .filter(Authentication::isAuthenticated)
@@ -140,10 +142,19 @@ public class Oauth2Authenticator implements AdditionalWebFilter {
                     "Binding cannot be completed without user authentication")))
                 .flatMap(authentication -> userConnectionService
                     .createConnection(authentication.getName(), authenticationToken)
-                    .then(this.authenticationSuccessHandler
-                        .onAuthenticationSuccess(webFilterExchange, authentication)
+                    .then(bindSuccessHandler(webFilterExchange).onAuthenticationSuccess(webFilterExchange, authentication)
                     )
                 );
+        }
+
+        private ServerAuthenticationSuccessHandler bindSuccessHandler(
+            WebFilterExchange webFilterExchange) {
+            String redirectUri = webFilterExchange.getExchange().getRequest().getQueryParams()
+                .getFirst("binding_redirect_uri");
+            if (StringUtils.isBlank(redirectUri)) {
+                redirectUri = "/console#/dashboard";
+            }
+            return new RedirectServerAuthenticationSuccessHandler(redirectUri);
         }
 
         @Override
@@ -154,7 +165,7 @@ public class Oauth2Authenticator implements AdditionalWebFilter {
         }
 
         Mono<Void> handleAuthenticationSuccess(Authentication authentication,
-            WebFilterExchange webFilterExchange) {
+                                               WebFilterExchange webFilterExchange) {
             // Save the authentication result in the SecurityContext
             ServerWebExchange exchange = webFilterExchange.getExchange();
             SecurityContextImpl securityContext = new SecurityContextImpl();
@@ -167,7 +178,7 @@ public class Oauth2Authenticator implements AdditionalWebFilter {
         }
 
         Mono<Authentication> mappedToSystemUserAuthentication(String registrationId,
-            Authentication authentication) {
+                                                              Authentication authentication) {
             return socialUserDetailsService.loadUserByUserId(registrationId,
                     authentication.getName())
                 .map(userDetails -> UsernamePasswordAuthenticationToken.authenticated(
