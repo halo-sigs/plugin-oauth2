@@ -124,9 +124,13 @@ public class Oauth2Authenticator implements AdditionalWebFilter {
                         .getAuthorizationRequest()
                         .getAdditionalParameters();
                     String socialConnection = (String) additionalParameters.get(SOCIAL_CONNECTION);
+                    String redirectUri = (String) additionalParameters.get("binding_redirect_uri");
                     if (Boolean.parseBoolean(socialConnection)) {
                         // Social connect successfully, finish the process
-                        return createConnection(webFilterExchange, authenticationResult);
+                        return createConnection(webFilterExchange, authenticationResult)
+                            .then(bindSuccessHandler(redirectUri)
+                                .onAuthenticationSuccess(webFilterExchange, authentication)
+                            );
                     }
                     return mappedToSystemUserAuthentication(registrationId, authenticationResult)
                         .flatMap(result -> handleAuthenticationSuccess(result, webFilterExchange));
@@ -142,17 +146,13 @@ public class Oauth2Authenticator implements AdditionalWebFilter {
                     "Binding cannot be completed without user authentication")))
                 .flatMap(authentication -> userConnectionService
                     .createConnection(authentication.getName(), authenticationToken)
-                    .then(bindSuccessHandler(webFilterExchange).onAuthenticationSuccess(webFilterExchange, authentication)
-                    )
-                );
+                )
+                .then();
         }
 
-        private ServerAuthenticationSuccessHandler bindSuccessHandler(
-            WebFilterExchange webFilterExchange) {
-            String redirectUri = webFilterExchange.getExchange().getRequest().getQueryParams()
-                .getFirst("binding_redirect_uri");
+        private ServerAuthenticationSuccessHandler bindSuccessHandler(String redirectUri) {
             if (StringUtils.isBlank(redirectUri)) {
-                redirectUri = "/console#/dashboard";
+                return new RedirectServerAuthenticationSuccessHandler("/console#/dashboard");
             }
             return new RedirectServerAuthenticationSuccessHandler(redirectUri);
         }
