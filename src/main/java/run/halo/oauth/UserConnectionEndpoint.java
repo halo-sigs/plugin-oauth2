@@ -54,13 +54,14 @@ public class UserConnectionEndpoint implements CustomEndpoint {
                         .required(true)
                         .implementation(String.class))
             )
-            .GET("connections/-", this::myConnections,
-                builder -> builder.operationId("myConnections")
-                    .description("Lists the third-party accounts information bound by myself.")
+            .POST("/disconnect/{registrationId}", this::disconnect,
+                builder -> builder.operationId("Disconnect")
+                    .description("Disconnect a third-party platform.")
                     .tag(tag)
-                    .response(responseBuilder()
-                        .implementation(ListedConnection.class)
-                    )
+                    .parameter(parameterBuilder().name("registrationId")
+                        .in(ParameterIn.PATH)
+                        .required(true)
+                        .implementation(String.class))
             )
             .build();
     }
@@ -76,9 +77,9 @@ public class UserConnectionEndpoint implements CustomEndpoint {
             .build();
     }
 
-    Mono<ServerResponse> myConnections(ServerRequest request) {
-        return userConnectionService.listMyConnections()
-            .collectList()
+    Mono<ServerResponse> disconnect(ServerRequest request) {
+        String registrationId = request.pathVariable("registrationId");
+        return userConnectionService.removeConnection(registrationId)
             .flatMap(result -> ServerResponse.ok()
                 .contentType(MediaType.APPLICATION_JSON)
                 .bodyValue(result)

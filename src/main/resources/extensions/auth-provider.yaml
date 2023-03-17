@@ -9,9 +9,10 @@ spec:
   website: https://github.com
   helpPage: https://docs.github.com/en/apps/oauth-apps/building-oauth-apps/creating-an-oauth-app
   authenticationUrl: /oauth2/authorization/github
+  bindingUrl: /apis/api.plugin.halo.run/v1alpha1/plugins/plugin-oauth-github/connect/{registrationId}
+  unbindUrl: /apis/api.plugin.halo.run/v1alpha1/plugins/plugin-oauth-github/disconnect/{registrationId}
   settingRef:
     name: generic-oauth-setting
     group: genericOauth
-  configMapKeyRef:
-    name: generic-oauth-configmap
-    key: github
+  configMapRef:
+    name: oauth-github-config

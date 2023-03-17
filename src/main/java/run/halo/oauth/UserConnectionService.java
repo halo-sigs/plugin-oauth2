@@ -24,10 +24,6 @@ public interface UserConnectionService {
     Mono<UserConnection> createConnection(String username,
         OAuth2LoginAuthenticationToken authentication);
 
-    /**
-     * Lists all connections for the current user.
-     *
-     * @return user connection list
-     */
-    Flux<ListedConnection> listMyConnections();
+
+    Mono<UserConnection> removeConnection(String registrationId);
 }

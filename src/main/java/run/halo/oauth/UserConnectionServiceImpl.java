@@ -1,13 +1,11 @@
 package run.halo.oauth;
 
-import java.util.Comparator;
 import lombok.RequiredArgsConstructor;
 import org.apache.commons.lang3.StringUtils;
 import org.springframework.security.core.context.ReactiveSecurityContextHolder;
 import org.springframework.security.oauth2.client.authentication.OAuth2LoginAuthenticationToken;
 import org.springframework.security.oauth2.core.user.OAuth2User;
 import org.springframework.stereotype.Component;
-import reactor.core.publisher.Flux;
 import reactor.core.publisher.Mono;
 import run.halo.app.core.extension.AuthProvider;
 import run.halo.app.core.extension.UserConnection;
@@ -27,6 +25,7 @@ public class UserConnectionServiceImpl implements UserConnectionService {
 
     private final ReactiveExtensionClient client;
     private final Oauth2UserProfileMapperManager oauth2UserProfileMapperManager;
+    private final Oauth2LoginConfiguration oauth2LoginConfiguration;
 
     @Override
     public Mono<UserConnection> createConnection(String username,
@@ -48,16 +47,19 @@ public class UserConnectionServiceImpl implements UserConnectionService {
     }
 
     @Override
-    public Flux<ListedConnection> listMyConnections() {
+    public Mono<UserConnection> removeConnection(String registrationId) {
         return ReactiveSecurityContextHolder.getContext()
             .map(securityContext -> securityContext.getAuthentication().getName())
             .switchIfEmpty(Mono.error(
-                new AccessDeniedException("Cannot list connections without user authentication")))
-            .flatMapMany(username -> client.list(UserConnection.class,
-                    persisted -> persisted.getSpec().getUsername().equals(username),
-                    Comparator.comparing(item -> item.getMetadata()
-                        .getCreationTimestamp())
-                ).flatMap(this::convertTo)
+                new AccessDeniedException("Cannot disconnect without user authentication"))
+            )
+            .flatMap(username -> fetchUserConnection(registrationId, username)
+                .flatMap(userConnection -> {
+                    String providerUserId = userConnection.getSpec().getProviderUserId();
+                    return oauth2LoginConfiguration.getAuthorizedClientService()
+                        .removeAuthorizedClient(registrationId, providerUserId)
+                        .then(client.delete(userConnection));
+                })
             );
     }
 

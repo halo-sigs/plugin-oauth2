@@ -37,12 +37,16 @@ public class OauthClientRegistrationRepository implements ReactiveClientRegistra
                 Mono.error(new ProviderNotFoundException(
                     "Unsupported OAuth2 provider: " + registrationId)))
             .flatMap(authProvider -> {
-                AuthProvider.ConfigMapKeyRef configMapKeyRef =
-                    authProvider.getSpec().getConfigMapKeyRef();
+                AuthProvider.ConfigMapRef configMapKeyRef =
+                    authProvider.getSpec().getConfigMapRef();
+                final String group = authProvider.getSpec().getSettingRef().getGroup();
                 return client.fetch(ConfigMap.class, configMapKeyRef.getName())
                     .map(ConfigMap::getData)
                     .map(data -> {
-                        String value = data.get(configMapKeyRef.getKey());
+                        String value = data.get(group);
+                        if (StringUtils.isBlank(value)) {
+                            return new ClientIdSecretPair("", "");
+                        }
                         return JsonUtils.jsonToObject(value, ClientIdSecretPair.class);
                     });
             })
