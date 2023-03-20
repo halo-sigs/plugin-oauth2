@@ -41,7 +41,6 @@ class OauthClientRegistrationRepositoryTest {
         authProvider.getMetadata().setName("github");
         authProvider.setSpec(new AuthProvider.AuthProviderSpec());
         authProvider.getSpec().setDisplayName("GitHub");
-        authProvider.getSpec().setEnabled(true);
         authProvider.getSpec().setAuthenticationUrl("/oauth2/authorization/github");
         authProvider.getSpec().setSettingRef(new AuthProvider.SettingRef());
         authProvider.getSpec().getSettingRef().setName("oauth-github-setting");

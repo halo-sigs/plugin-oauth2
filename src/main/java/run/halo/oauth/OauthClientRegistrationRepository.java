@@ -36,7 +36,6 @@ public class OauthClientRegistrationRepository implements ReactiveClientRegistra
     @Override
     public Mono<ClientRegistration> findByRegistrationId(String registrationId) {
         return client.fetch(AuthProvider.class, registrationId)
-            .filter(authProvider -> isTrue(authProvider.getSpec().getEnabled()))
             .switchIfEmpty(
                 Mono.error(new ProviderNotFoundException(
                     "Unsupported OAuth2 provider: " + registrationId)))
