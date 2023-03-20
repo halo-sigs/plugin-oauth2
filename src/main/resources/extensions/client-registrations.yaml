@@ -1,0 +1,38 @@
+apiVersion: oauth.halo.run/v1alpha1
+kind: Oauth2ClientRegistration
+metadata:
+  name: github
+spec:
+  clientAuthenticationMethod: "client_secret_basic"
+  authorizationGrantType: "authorization_code"
+  redirectUri: "{baseUrl}/login/oauth2/code/github"
+  scopes:
+    - "read:user"
+  authorizationUri: "https://github.com/login/oauth/authorize"
+  tokenUri: "https://github.com/login/oauth/access_token"
+  userInfoUri: "https://api.github.com/user"
+  userInfoAuthenticationMethod: "header"
+  userNameAttributeName: "id"
+  clientName: "GitHub"
+---
+apiVersion: oauth.halo.run/v1alpha1
+kind: Oauth2ClientRegistration
+metadata:
+  name: gitee
+spec:
+  clientAuthenticationMethod: "client_secret_basic"
+  authorizationGrantType: "authorization_code"
+  redirectUri: "{baseUrl}/login/oauth2/code/gitee"
+  scopes:
+    - "user_info"
+  authorizationUri: "https://gitee.com/oauth/authorize"
+  tokenUri: "https://gitee.com/oauth/token"
+  userInfoUri: "https://gitee.com/api/v5/user"
+  userInfoAuthenticationMethod: "header"
+  userNameAttributeName: "login"
+  clientName: "Gitee"
+  settingRef:
+    name: generic-oauth-setting
+    group: genericOauth
+  configMapRef:
+    name: oauth-gitee-config

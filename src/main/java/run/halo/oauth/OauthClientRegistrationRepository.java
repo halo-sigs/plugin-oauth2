@@ -18,6 +18,7 @@ import run.halo.app.core.extension.AuthProvider;
 import run.halo.app.extension.ConfigMap;
 import run.halo.app.extension.ReactiveExtensionClient;
 import run.halo.app.extension.store.ExtensionStore;
+import run.halo.app.infra.exception.NotFoundException;
 import run.halo.app.infra.utils.JsonUtils;
 
 /**
@@ -60,17 +61,25 @@ public class OauthClientRegistrationRepository implements ReactiveClientRegistra
                     "ConfigMap " + configMapKeyRef.getName() + " not found")
                 )
             )
-            .map(idSecretPair -> {
+            .flatMap(idSecretPair -> {
                 if (StringUtils.isBlank(idSecretPair.clientId())) {
-                    throw new IllegalArgumentException("clientId must not be blank");
+                    return Mono.error(new IllegalArgumentException("clientId must not be blank"));
                 }
                 if (StringUtils.isBlank(idSecretPair.clientSecret())) {
-                    throw new IllegalArgumentException("clientSecret must not be blank");
+                    return Mono.error(
+                        new IllegalArgumentException("clientSecret must not be blank"));
                 }
-                return clientRegistrationBuilder(authProvider)
-                    .clientId(idSecretPair.clientId())
-                    .clientSecret(idSecretPair.clientSecret())
-                    .build();
+                String registrationId = authProvider.getMetadata().getName();
+                return client.fetch(Oauth2ClientRegistration.class, registrationId)
+                    .switchIfEmpty(Mono.error(new NotFoundException(
+                        "Oauth2 client registration " + registrationId + " not found")
+                    ))
+                    .map(oauth2ClientRegistration -> clientRegistrationBuilder(
+                        oauth2ClientRegistration)
+                        .clientId(idSecretPair.clientId())
+                        .clientSecret(idSecretPair.clientSecret())
+                        .build()
+                    );
             });
     }
 
@@ -106,35 +115,33 @@ public class OauthClientRegistrationRepository implements ReactiveClientRegistra
         return new AuthenticationMethod(method.toLowerCase());
     }
 
-    ClientRegistration.Builder clientRegistrationBuilder(AuthProvider authProvider) {
-        AuthProvider.ClientRegistration registration =
-            authProvider.getSpec().getClientRegistration();
+    ClientRegistration.Builder clientRegistrationBuilder(Oauth2ClientRegistration registration) {
         if (registration == null) {
             throw new IllegalArgumentException(
                 "The clientRegistration in AuthProvider must not be null");
         }
-
-        return ClientRegistration.withRegistrationId(authProvider.getMetadata().getName())
-            .clientName(registration.getClientName())
+        Oauth2ClientRegistration.Oauth2ClientRegistrationSpec spec = registration.getSpec();
+        return ClientRegistration.withRegistrationId(registration.getMetadata().getName())
+            .clientName(spec.getClientName())
             .clientAuthenticationMethod(
-                toClientAuthenticationMethod(registration.getClientAuthenticationMethod())
+                toClientAuthenticationMethod(spec.getClientAuthenticationMethod())
             )
             .authorizationGrantType(
-                toAuthorizationGrantType(registration.getAuthorizationGrantType())
+                toAuthorizationGrantType(spec.getAuthorizationGrantType())
             )
-            .authorizationUri(registration.getAuthorizationUri())
-            .issuerUri(registration.getIssuerUri())
-            .jwkSetUri(registration.getJwkSetUri())
-            .redirectUri(defaultIfNull(registration.getRedirectUri(), DEFAULT_REDIRECT_URL))
-            .scope(registration.getScopes())
-            .tokenUri(registration.getTokenUri())
+            .authorizationUri(spec.getAuthorizationUri())
+            .issuerUri(spec.getIssuerUri())
+            .jwkSetUri(spec.getJwkSetUri())
+            .redirectUri(defaultIfNull(spec.getRedirectUri(), DEFAULT_REDIRECT_URL))
+            .scope(spec.getScopes())
+            .tokenUri(spec.getTokenUri())
             .userInfoAuthenticationMethod(
-                toAuthenticationMethod(registration.getUserInfoAuthenticationMethod())
+                toAuthenticationMethod(spec.getUserInfoAuthenticationMethod())
             )
-            .userInfoUri(registration.getUserInfoUri())
+            .userInfoUri(spec.getUserInfoUri())
             .providerConfigurationMetadata(
-                defaultIfNull(registration.getConfigurationMetadata(), Map.of())
+                defaultIfNull(spec.getConfigurationMetadata(), Map.of())
             )
-            .userNameAttributeName(registration.getUserNameAttributeName());
+            .userNameAttributeName(spec.getUserNameAttributeName());
     }
 }

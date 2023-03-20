@@ -5,13 +5,13 @@ import org.springframework.stereotype.Component;
 import org.springframework.util.Assert;
 
 /**
- * GitHub user profile mapper.
+ * A generic oauth2 user profile mapper.
  *
  * @author guqing
  * @since 1.0.0
  */
 @Component
-public class GithubUserProfileMapper implements Oauth2UserProfileMapper {
+public class GenericUserProfileMapper implements Oauth2UserProfileMapper {
 
     @Override
     public Oauth2UserProfile mapProfile(OAuth2User oauth2User) {
@@ -26,6 +26,6 @@ public class GithubUserProfileMapper implements Oauth2UserProfileMapper {
     @Override
     public boolean supports(String registrationId) {
         Assert.hasText(registrationId, "Registration id must not be blank");
-        return registrationId.equalsIgnoreCase("github");
+        return true;
     }
 }

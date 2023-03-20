@@ -12,18 +12,18 @@ import org.springframework.security.oauth2.core.user.DefaultOAuth2User;
 import org.springframework.security.oauth2.core.user.OAuth2User;
 
 /**
- * Tests for {@link GithubUserProfileMapper}.
+ * Tests for {@link GenericUserProfileMapper}.
  *
  * @author guqing
  * @since 2.0.0
  */
 class GithubUserProfileMapperTest {
 
-    private GithubUserProfileMapper mapper;
+    private GenericUserProfileMapper mapper;
 
     @BeforeEach
     public void setup() {
-        mapper = new GithubUserProfileMapper();
+        mapper = new GenericUserProfileMapper();
     }
 
     @Test

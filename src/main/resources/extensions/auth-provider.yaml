@@ -12,18 +12,6 @@ spec:
   authenticationUrl: /oauth2/authorization/github
   bindingUrl: /apis/api.plugin.halo.run/v1alpha1/plugins/plugin-oauth-github/connect/github
   unbindUrl: /apis/api.plugin.halo.run/v1alpha1/plugins/plugin-oauth-github/disconnect/github
-  clientRegistration:
-    clientAuthenticationMethod: "client_secret_basic"
-    authorizationGrantType: "authorization_code"
-    redirectUri: "{baseUrl}/login/oauth2/code/github"
-    scopes:
-      - "read:user"
-    authorizationUri: "https://github.com/login/oauth/authorize"
-    tokenUri: "https://github.com/login/oauth/access_token"
-    userInfoUri: "https://api.github.com/user"
-    userInfoAuthenticationMethod: "header"
-    userNameAttributeName: "id"
-    clientName: "GitHub"
   settingRef:
     name: generic-oauth-setting
     group: genericOauth

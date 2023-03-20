@@ -25,10 +25,12 @@ public class OauthGithubPlugin extends BasePlugin {
     @Override
     public void start() {
         schemeManager.register(AuthorizedClient.class);
+        schemeManager.register(Oauth2ClientRegistration.class);
     }
 
     @Override
     public void stop() {
         schemeManager.unregister(Scheme.buildFromType(AuthorizedClient.class));
+        schemeManager.unregister(Scheme.buildFromType(Oauth2ClientRegistration.class));
     }
 }

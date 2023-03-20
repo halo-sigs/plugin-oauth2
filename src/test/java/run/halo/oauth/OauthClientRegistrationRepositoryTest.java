@@ -49,12 +49,17 @@ class OauthClientRegistrationRepositoryTest {
         authProvider.getSpec().setConfigMapRef(new AuthProvider.ConfigMapRef());
         authProvider.getSpec().getConfigMapRef().setName("oauth-github-config");
 
-        authProvider.getSpec().setClientRegistration(new AuthProvider.ClientRegistration());
-        authProvider.getSpec().getClientRegistration().setAuthorizationUri("fake-uri");
-        authProvider.getSpec().getClientRegistration().setTokenUri("fake-token-uri");
-
         when(client.fetch(eq(AuthProvider.class), eq("github")))
             .thenReturn(Mono.just(authProvider));
+
+        Oauth2ClientRegistration registration = new Oauth2ClientRegistration();
+        registration.setMetadata(new Metadata());
+        registration.getMetadata().setName("github");
+        registration.setSpec(new Oauth2ClientRegistration.Oauth2ClientRegistrationSpec());
+        registration.getSpec().setAuthorizationUri("fake-uri");
+        registration.getSpec().setTokenUri("fake-token-uri");
+        when(client.fetch(eq(Oauth2ClientRegistration.class), eq("github")))
+            .thenReturn(Mono.just(registration));
 
         ConfigMap configMap = new ConfigMap();
         configMap.setData(Map.of("github",
