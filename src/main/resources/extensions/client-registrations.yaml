@@ -31,3 +31,20 @@ spec:
   userInfoAuthenticationMethod: "header"
   userNameAttributeName: "login"
   clientName: "Gitee"
+---
+apiVersion: oauth.halo.run/v1alpha1
+kind: Oauth2ClientRegistration
+metadata:
+  name: gitlab
+spec:
+  clientAuthenticationMethod: "client_secret_basic"
+  authorizationGrantType: "authorization_code"
+  redirectUri: "{baseUrl}/login/oauth2/code/gitlab"
+  scopes:
+    - "read_user"
+  authorizationUri: "https://gitlab.com/oauth/authorize"
+  tokenUri: "https://gitlab.com/oauth/token"
+  userInfoUri: "https://gitlab.com/api/v4/user"
+  userInfoAuthenticationMethod: "header"
+  userNameAttributeName: "username"
+  clientName: "GitLab"

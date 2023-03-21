@@ -20,6 +20,7 @@ import run.halo.app.core.extension.AuthProvider;
 import run.halo.app.extension.ConfigMap;
 import run.halo.app.extension.Metadata;
 import run.halo.app.extension.ReactiveExtensionClient;
+import run.halo.app.infra.SystemSetting;
 
 /**
  * @author guqing
@@ -50,6 +51,11 @@ class OauthClientRegistrationRepositoryTest {
 
         when(client.fetch(eq(AuthProvider.class), eq("github")))
             .thenReturn(Mono.just(authProvider));
+        ConfigMap systemConfig = new ConfigMap();
+        systemConfig.setData(Map.of(SystemSetting.AuthProvider.GROUP,
+            "{\"enabled\":[\"github\"]}"));
+        when(client.fetch(eq(ConfigMap.class), eq(SystemSetting.SYSTEM_CONFIG)))
+            .thenReturn(Mono.just(systemConfig));
 
         Oauth2ClientRegistration registration = new Oauth2ClientRegistration();
         registration.setMetadata(new Metadata());

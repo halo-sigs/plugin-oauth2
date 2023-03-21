@@ -1,23 +1,28 @@
 package run.halo.oauth;
 
-import static org.apache.commons.lang3.BooleanUtils.isTrue;
 import static org.apache.commons.lang3.ObjectUtils.defaultIfNull;
 
+import java.util.HashMap;
+import java.util.HashSet;
 import java.util.Map;
+import java.util.Set;
 import lombok.RequiredArgsConstructor;
 import org.apache.commons.lang3.StringUtils;
+import org.springframework.lang.NonNull;
 import org.springframework.security.authentication.ProviderNotFoundException;
 import org.springframework.security.oauth2.client.registration.ClientRegistration;
 import org.springframework.security.oauth2.client.registration.ReactiveClientRegistrationRepository;
 import org.springframework.security.oauth2.core.AuthenticationMethod;
 import org.springframework.security.oauth2.core.AuthorizationGrantType;
 import org.springframework.security.oauth2.core.ClientAuthenticationMethod;
+import org.springframework.security.oauth2.core.OAuth2AuthenticationException;
 import org.springframework.util.Assert;
 import reactor.core.publisher.Mono;
 import run.halo.app.core.extension.AuthProvider;
 import run.halo.app.extension.ConfigMap;
 import run.halo.app.extension.ReactiveExtensionClient;
 import run.halo.app.extension.store.ExtensionStore;
+import run.halo.app.infra.SystemSetting;
 import run.halo.app.infra.exception.NotFoundException;
 import run.halo.app.infra.utils.JsonUtils;
 
@@ -39,6 +44,15 @@ public class OauthClientRegistrationRepository implements ReactiveClientRegistra
             .switchIfEmpty(
                 Mono.error(new ProviderNotFoundException(
                     "Unsupported OAuth2 provider: " + registrationId)))
+            .flatMap(provider -> fetchEnabledProviders()
+                .map(enabledNames -> {
+                    if (enabledNames.contains(registrationId)) {
+                        return provider;
+                    }
+                    throw new OAuth2AuthenticationException(
+                        "Authentication provider is not enabled: " + registrationId);
+                })
+            )
             .flatMap(this::getClientRegistrationMono);
     }
 
@@ -142,5 +156,35 @@ public class OauthClientRegistrationRepository implements ReactiveClientRegistra
                 defaultIfNull(spec.getConfigurationMetadata(), Map.of())
             )
             .userNameAttributeName(spec.getUserNameAttributeName());
+    }
+
+    Mono<Set<String>> fetchEnabledProviders() {
+        return client.fetch(ConfigMap.class, SystemSetting.SYSTEM_CONFIG)
+            .map(configMap -> {
+                var authProvider = getAuthProvider(configMap);
+                return authProvider.getEnabled();
+            })
+            .defaultIfEmpty(Set.of());
+    }
+
+    @NonNull
+    private static SystemSetting.AuthProvider getAuthProvider(ConfigMap configMap) {
+        if (configMap.getData() == null) {
+            configMap.setData(new HashMap<>());
+        }
+
+        Map<String, String> data = configMap.getData();
+        String providerGroup = data.get(SystemSetting.AuthProvider.GROUP);
+        SystemSetting.AuthProvider authProvider;
+        if (StringUtils.isBlank(providerGroup)) {
+            authProvider = new SystemSetting.AuthProvider();
+        } else {
+            authProvider = JsonUtils.jsonToObject(providerGroup, SystemSetting.AuthProvider.class);
+        }
+
+        if (authProvider.getEnabled() == null) {
+            authProvider.setEnabled(new HashSet<>());
+        }
+        return authProvider;
     }
 }
