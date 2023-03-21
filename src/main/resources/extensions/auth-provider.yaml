@@ -29,18 +29,6 @@ spec:
   authenticationUrl: /oauth2/authorization/gitee
   bindingUrl: /apis/api.plugin.halo.run/v1alpha1/plugins/plugin-oauth2/connect/gitee
   unbindUrl: /apis/api.plugin.halo.run/v1alpha1/plugins/plugin-oauth2/disconnect/gitee
-  clientRegistration:
-    clientAuthenticationMethod: "client_secret_basic"
-    authorizationGrantType: "authorization_code"
-    redirectUri: "{baseUrl}/login/oauth2/code/gitee"
-    scopes:
-      - "user_info"
-    authorizationUri: "https://gitee.com/oauth/authorize"
-    tokenUri: "https://gitee.com/oauth/token"
-    userInfoUri: "https://gitee.com/api/v5/user"
-    userInfoAuthenticationMethod: "header"
-    userNameAttributeName: "login"
-    clientName: "Gitee"
   settingRef:
     name: generic-oauth2-setting
     group: genericOauth
