@@ -37,7 +37,7 @@ public class UserConnectionEndpoint implements CustomEndpoint {
     @Override
     public RouterFunction<ServerResponse> endpoint() {
         return SpringdocRouteBuilder.route()
-            .nest(RequestPredicates.path("/plugins/plugin-oauth-github"), this::nested,
+            .nest(RequestPredicates.path("/plugins/plugin-oauth2"), this::nested,
                 builder -> builder.operationId("PluginOauthGithubEndpoints")
                     .description("Plugin OAuth GitHub Endpoints").tag(tag)
             )

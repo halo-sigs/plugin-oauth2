@@ -5,7 +5,7 @@ import Vue from "@vitejs/plugin-vue";
 import VueJsx from "@vitejs/plugin-vue-jsx";
 import Icons from "unplugin-icons/vite";
 
-const pluginEntryName = "PluginStarter";
+const pluginEntryName = "PluginOauth2";
 
 // https://vitejs.dev/config/
 export default defineConfig({

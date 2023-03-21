@@ -31,8 +31,3 @@ spec:
   userInfoAuthenticationMethod: "header"
   userNameAttributeName: "login"
   clientName: "Gitee"
-  settingRef:
-    name: generic-oauth-setting
-    group: genericOauth
-  configMapRef:
-    name: oauth-gitee-config

@@ -1,6 +1,6 @@
-# plugin-oauth-github
+# plugin-oauth2
 
-Halo 2.0 的 GitHub 第三方登录插件。
+Halo 2.0 的 Oauth2 第三方登录插件。
 
 ## 开发环境
 

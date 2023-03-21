@@ -1,7 +1,7 @@
 apiVersion: v1alpha1
 kind: Setting
 metadata:
-  name: generic-oauth-setting
+  name: generic-oauth2-setting
 spec:
   forms:
     - group: genericOauth
