@@ -11,7 +11,7 @@ spec:
           name: clientId
           label: "Client ID"
           validation: required:trim
-        - $formkit: text
+        - $formkit: password
           name: clientSecret
           label: "Client Secret"
           validation: required:trim
