@@ -1,0 +1,23 @@
+apiVersion: v1alpha1
+kind: Role
+metadata:
+  name: plugin-oauth-role-template
+  labels:
+    halo.run/hidden: 'true'
+    halo.run/role-template: 'true'
+rules:
+  - apiGroups: [ "api.plugin.halo.run" ]
+    resourceNames: [ "plugin-oauth2" ]
+    resources: [ "plugins/connect", "plugins/disconnect" ]
+    verbs: [ "get", "list", "update" ]
+---
+apiVersion: v1alpha1
+kind: RoleBinding
+metadata:
+  name: rolebinding-authenticated-plugin-oauth
+roleRef:
+  kind: Role
+  name: plugin-oauth-role-template
+subjects:
+  - kind: Role
+    name: authenticated

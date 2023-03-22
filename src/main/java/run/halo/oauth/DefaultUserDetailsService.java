@@ -8,11 +8,11 @@ import org.springframework.security.authentication.BadCredentialsException;
 import org.springframework.security.core.userdetails.ReactiveUserDetailsService;
 import org.springframework.security.core.userdetails.UserDetails;
 import org.springframework.stereotype.Component;
+import reactor.core.publisher.Flux;
 import reactor.core.publisher.Mono;
 import run.halo.app.core.extension.Role;
 import run.halo.app.core.extension.RoleBinding;
 import run.halo.app.core.extension.User;
-import run.halo.app.core.extension.service.RoleService;
 import run.halo.app.extension.GroupKind;
 import run.halo.app.extension.ReactiveExtensionClient;
 import run.halo.app.extension.exception.ExtensionNotFoundException;
@@ -29,14 +29,13 @@ import run.halo.app.infra.exception.UserNotFoundException;
 public class DefaultUserDetailsService implements ReactiveUserDetailsService {
 
     private final ReactiveExtensionClient client;
-    private final RoleService roleService;
 
     @Override
     public Mono<UserDetails> findByUsername(String username) {
         return getUser(username)
             .flatMap(user -> {
                 var subject = new RoleBinding.Subject(KIND, username, GROUP);
-                return roleService.listRoleRefs(subject)
+                return listRoleRefs(subject)
                     .filter(this::isRoleRef)
                     .map(RoleBinding.RoleRef::getName)
                     .collectList()
@@ -48,6 +47,13 @@ public class DefaultUserDetailsService implements ReactiveUserDetailsService {
             })
             .onErrorMap(ExtensionNotFoundException.class,
                 e -> new BadCredentialsException("Invalid Credentials"));
+    }
+
+    public Flux<RoleBinding.RoleRef> listRoleRefs(RoleBinding.Subject subject) {
+        return client.list(RoleBinding.class,
+                binding -> binding.getSubjects().contains(subject),
+                null)
+            .map(RoleBinding::getRoleRef);
     }
 
     public Mono<User> getUser(String username) {

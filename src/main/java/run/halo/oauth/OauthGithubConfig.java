@@ -7,9 +7,6 @@ import org.springframework.web.reactive.function.server.RouterFunction;
 import org.springframework.web.reactive.function.server.ServerResponse;
 import run.halo.app.core.extension.endpoint.CustomEndpoint;
 import run.halo.app.core.extension.endpoint.CustomEndpointsBuilder;
-import run.halo.app.core.extension.service.DefaultRoleService;
-import run.halo.app.core.extension.service.RoleService;
-import run.halo.app.extension.ReactiveExtensionClient;
 
 /**
  * @author guqing
@@ -17,11 +14,6 @@ import run.halo.app.extension.ReactiveExtensionClient;
  */
 @Configuration
 public class OauthGithubConfig {
-
-    @Bean
-    RoleService roleService(ReactiveExtensionClient client) {
-        return new DefaultRoleService(client);
-    }
 
     @Bean
     RouterFunction<ServerResponse> oauthGithubRouter(ApplicationContext applicationContext) {

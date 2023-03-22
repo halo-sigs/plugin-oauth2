@@ -1,7 +1,6 @@
 package run.halo.oauth;
 
 import org.springframework.security.oauth2.client.authentication.OAuth2LoginAuthenticationToken;
-import reactor.core.publisher.Flux;
 import reactor.core.publisher.Mono;
 import run.halo.app.core.extension.UserConnection;
 
