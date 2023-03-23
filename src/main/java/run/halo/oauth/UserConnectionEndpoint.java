@@ -54,7 +54,7 @@ public class UserConnectionEndpoint implements CustomEndpoint {
                         .required(true)
                         .implementation(String.class))
             )
-            .POST("/disconnect/{registrationId}", this::disconnect,
+            .PUT("/disconnect/{registrationId}", this::disconnect,
                 builder -> builder.operationId("Disconnect")
                     .description("Disconnect a third-party platform.")
                     .tag(tag)
