@@ -1,5 +1,4 @@
 plugins {
-    id "com.github.node-gradle.node" version "3.3.0"
     id "io.github.guqing.plugin-development" version "0.0.6-SNAPSHOT"
     id 'java'
 }
@@ -44,24 +43,4 @@ dependencies {
 
 test {
     useJUnitPlatform()
-}
-
-node {
-    nodeProjectDir = file("${project.projectDir}/console")
-}
-
-task buildFrontend(type: NpxTask) {
-    command = 'pnpm'
-    args = ['build']
-}
-
-task pnpmInstall(type: NpxTask) {
-    command = "pnpm"
-    args = ["install"]
-}
-
-build {
-    // build frontend before build
-    tasks.getByName('compileJava').dependsOn('buildFrontend')
-    tasks.getByName("buildFrontend").dependsOn("pnpmInstall")
 }
