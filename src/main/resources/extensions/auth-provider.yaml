@@ -1,0 +1,60 @@
+apiVersion: auth.halo.run/v1alpha1
+kind: AuthProvider
+metadata:
+  name: github
+  labels:
+    auth.halo.run/auth-binding: "true"
+spec:
+  displayName: GitHub
+  description: GitHub Inc. is a web-based hosting service for version control using Git.
+  logo: /plugins/plugin-oauth2/assets/static/github.svg
+  website: https://github.com
+  helpPage: https://docs.github.com/en/apps/oauth-apps/building-oauth-apps/creating-an-oauth-app
+  authenticationUrl: /oauth2/authorization/github
+  bindingUrl: /apis/api.plugin.halo.run/v1alpha1/plugins/plugin-oauth2/connect/github
+  unbindUrl: /apis/api.plugin.halo.run/v1alpha1/plugins/plugin-oauth2/disconnect/github
+  settingRef:
+    name: generic-oauth2-setting
+    group: genericOauth
+  configMapRef:
+    name: oauth2-github-config
+---
+apiVersion: auth.halo.run/v1alpha1
+kind: AuthProvider
+metadata:
+  name: gitee
+  labels:
+    auth.halo.run/auth-binding: "true"
+spec:
+  displayName: Gitee
+  description: Gitee is a software development collaboration platform for efficient project development.
+  logo: /plugins/plugin-oauth2/assets/static/gitee.svg
+  website: https://gitee.com
+  authenticationUrl: /oauth2/authorization/gitee
+  bindingUrl: /apis/api.plugin.halo.run/v1alpha1/plugins/plugin-oauth2/connect/gitee
+  unbindUrl: /apis/api.plugin.halo.run/v1alpha1/plugins/plugin-oauth2/disconnect/gitee
+  settingRef:
+    name: generic-oauth2-setting
+    group: genericOauth
+  configMapRef:
+    name: oauth2-gitee-config
+---
+apiVersion: auth.halo.run/v1alpha1
+kind: AuthProvider
+metadata:
+  name: gitlab
+  labels:
+    auth.halo.run/auth-binding: "true"
+spec:
+  displayName: GitLab
+  description: Gitee is a software development collaboration platform for efficient project development.
+  logo: /plugins/plugin-oauth2/assets/static/gitlab.svg
+  website: https://gitlab.com
+  authenticationUrl: /oauth2/authorization/gitlab
+  bindingUrl: /apis/api.plugin.halo.run/v1alpha1/plugins/plugin-oauth2/connect/gitlab
+  unbindUrl: /apis/api.plugin.halo.run/v1alpha1/plugins/plugin-oauth2/disconnect/gitlab
+  settingRef:
+    name: generic-oauth2-setting
+    group: genericOauth
+  configMapRef:
+    name: oauth2-gitlab-config

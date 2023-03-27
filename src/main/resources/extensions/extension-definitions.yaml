@@ -1,0 +1,24 @@
+apiVersion: plugin.halo.run/v1alpha1
+kind: ExtensionDefinition
+metadata:
+  name: github-oauth2authenticator
+  labels:
+    auth.halo.run/extension-point-name: "additional-webfilter"
+spec:
+  className: run.halo.app.security.authentication.oauth2.Oauth2Authenticator
+  extensionPointName: additional-webfilter
+  displayName: "Oauth2Authenticator"
+  description: "Authenticates a user by oauth2."
+
+---
+apiVersion: plugin.halo.run/v1alpha1
+kind: ExtensionDefinition
+metadata:
+  name: github-authorization-request-redirect-web-filter
+  labels:
+    auth.halo.run/extension-point-name: "additional-webfilter"
+spec:
+  className: run.halo.app.security.authentication.oauth2.Oauth2AuthorizationRequestRedirectWebFilter
+  extensionPointName: additional-webfilter
+  displayName: "Oauth2AuthorizationRequestRedirectWebFilter"
+  description: "Redirects to the OAuth 2.0 Provider's Authorization Endpoint."

@@ -1,0 +1,16 @@
+apiVersion: v1alpha1
+kind: Role
+metadata:
+  name: plugin-oauth-role-template
+  labels:
+    halo.run/hidden: "true"
+    halo.run/role-template: "true"
+    rbac.authorization.halo.run/aggregate-to-authenticated: "true"
+  annotations:
+    rbac.authorization.halo.run/module: "Authentication"
+    rbac.authorization.halo.run/display-name: "OAuth2 AccessRole"
+rules:
+  - apiGroups: [ "api.plugin.halo.run" ]
+    resourceNames: [ "plugin-oauth2" ]
+    resources: [ "plugins/connect", "plugins/disconnect" ]
+    verbs: [ "get", "list", "update" ]
