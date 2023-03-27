@@ -20,30 +20,6 @@ jobs:
           distribution: 'temurin'
           cache: 'gradle'
           java-version: 17
-      - name: Set up Node.js
-        uses: actions/setup-node@v3
-        with:
-          node-version: 16
-      - uses: pnpm/action-setup@v2.0.1
-        name: Install pnpm
-        id: pnpm-install
-        with:
-          version: 7
-          run_install: false
-      - name: Get pnpm store directory
-        id: pnpm-cache
-        run: |
-          echo "::set-output name=pnpm_cache_dir::$(pnpm store path)"
-      - uses: actions/cache@v3
-        name: Setup pnpm cache
-        with:
-          path: ${{ steps.pnpm-cache.outputs.pnpm_cache_dir }}
-          key: ${{ runner.os }}-pnpm-store-${{ hashFiles('**/console/pnpm-lock.yaml') }}
-          restore-keys: |
-            ${{ runner.os }}-pnpm-store-
-      - name: Install Frontend Dependencies
-        run: |
-          ./gradlew pnpmInstall
       - name: Build with Gradle
         run: |
           # Set the version with tag name when releasing
@@ -51,10 +27,10 @@ jobs:
           version=${version#v}
           sed -i "s/version=.*-SNAPSHOT$/version=$version/1" gradle.properties
           ./gradlew clean build -x test
-      - name: Archive plugin-starter jar
+      - name: Archive plugin-oauth2 jar
         uses: actions/upload-artifact@v2
         with:
-          name: plugin-starter
+          name: plugin-oauth2
           path: |
             build/libs/*.jar
           retention-days: 1
@@ -64,10 +40,10 @@ jobs:
     needs: build
     if: github.event_name == 'release'
     steps:
-      - name: Download plugin-starter jar
+      - name: Download plugin-oauth2 jar
         uses: actions/download-artifact@v2
         with:
-          name: plugin-starter
+          name: plugin-oauth2
           path: build/libs
       - name: Get Name of Artifact
         id: get_artifact
