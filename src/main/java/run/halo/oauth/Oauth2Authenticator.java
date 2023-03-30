@@ -3,6 +3,7 @@ package run.halo.oauth;
 import static org.apache.commons.lang3.StringUtils.defaultString;
 import static run.halo.oauth.SocialServerOauth2AuthorizationRequestResolver.SOCIAL_CONNECTION;
 
+import java.nio.charset.StandardCharsets;
 import org.apache.commons.lang3.StringUtils;
 import org.springframework.lang.NonNull;
 import org.springframework.security.authentication.ReactiveAuthenticationManager;
@@ -26,6 +27,7 @@ import org.springframework.stereotype.Component;
 import org.springframework.util.Assert;
 import org.springframework.web.server.ServerWebExchange;
 import org.springframework.web.server.WebFilterChain;
+import org.springframework.web.util.UriUtils;
 import reactor.core.publisher.Mono;
 import run.halo.app.infra.exception.AccessDeniedException;
 import run.halo.app.security.AdditionalWebFilter;
@@ -158,7 +160,8 @@ public class Oauth2Authenticator implements AdditionalWebFilter {
             String name = defaultString(oauth2User.getAttribute("name"), loginName);
             String redirectUri = String.format("/console#/binding/%s?login=%s&name=%s",
                 registrationId, loginName, name);
-            return new RedirectServerAuthenticationSuccessHandler(redirectUri);
+            String encodedUri = UriUtils.encodePath(redirectUri, StandardCharsets.UTF_8);
+            return new RedirectServerAuthenticationSuccessHandler(encodedUri);
         }
 
         private Mono<Void> createConnection(WebFilterExchange webFilterExchange,
