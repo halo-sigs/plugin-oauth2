@@ -132,9 +132,26 @@ public class Oauth2Authenticator implements AdditionalWebFilter {
                                 .onAuthenticationSuccess(webFilterExchange, authentication)
                             );
                     }
-                    return mappedToSystemUserAuthentication(registrationId, authenticationResult)
-                        .flatMap(result -> handleAuthenticationSuccess(result, webFilterExchange));
+                    return userConnectionService.isConnected(registrationId,
+                            authenticationResult.getName())
+                        .flatMap(connected -> {
+                            if (connected) {
+                                // login
+                                return mappedToSystemUserAuthentication(registrationId,
+                                    authenticationResult)
+                                    .flatMap(result -> handleAuthenticationSuccess(result,
+                                        webFilterExchange));
+                            }
+                            // signup
+                            return registrationPageHandler(registrationId)
+                                .onAuthenticationSuccess(webFilterExchange, authentication);
+                        });
                 }));
+        }
+
+        private ServerAuthenticationSuccessHandler registrationPageHandler(String registrationId) {
+            return new RedirectServerAuthenticationSuccessHandler(
+                "/console#/binding/" + registrationId);
         }
 
         private Mono<Void> createConnection(WebFilterExchange webFilterExchange,

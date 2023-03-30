@@ -25,4 +25,6 @@ public interface UserConnectionService {
 
 
     Mono<UserConnection> removeConnection(String registrationId);
+
+    Mono<Boolean> isConnected(String registrationId, String providerUserId);
 }
