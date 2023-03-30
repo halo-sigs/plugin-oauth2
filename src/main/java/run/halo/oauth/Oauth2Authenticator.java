@@ -1,5 +1,6 @@
 package run.halo.oauth;
 
+import static org.apache.commons.lang3.StringUtils.defaultString;
 import static run.halo.oauth.SocialServerOauth2AuthorizationRequestResolver.SOCIAL_CONNECTION;
 
 import org.apache.commons.lang3.StringUtils;
@@ -15,6 +16,7 @@ import org.springframework.security.oauth2.client.OAuth2AuthorizedClient;
 import org.springframework.security.oauth2.client.authentication.OAuth2LoginAuthenticationToken;
 import org.springframework.security.oauth2.client.web.server.ServerOAuth2AuthorizedClientRepository;
 import org.springframework.security.oauth2.client.web.server.authentication.OAuth2LoginAuthenticationWebFilter;
+import org.springframework.security.oauth2.core.user.OAuth2User;
 import org.springframework.security.web.server.WebFilterExchange;
 import org.springframework.security.web.server.authentication.AuthenticationWebFilter;
 import org.springframework.security.web.server.authentication.RedirectServerAuthenticationSuccessHandler;
@@ -143,15 +145,20 @@ public class Oauth2Authenticator implements AdditionalWebFilter {
                                         webFilterExchange));
                             }
                             // signup
-                            return registrationPageHandler(registrationId)
+                            OAuth2User principal = authenticationResult.getPrincipal();
+                            return registrationPageHandler(registrationId, principal)
                                 .onAuthenticationSuccess(webFilterExchange, authentication);
                         });
                 }));
         }
 
-        private ServerAuthenticationSuccessHandler registrationPageHandler(String registrationId) {
-            return new RedirectServerAuthenticationSuccessHandler(
-                "/console#/binding/" + registrationId);
+        private ServerAuthenticationSuccessHandler registrationPageHandler(String registrationId,
+                                                                           OAuth2User oauth2User) {
+            String loginName = oauth2User.getName();
+            String name = defaultString(oauth2User.getAttribute("name"), loginName);
+            String redirectUri = String.format("/console#/binding/%s?login=%s&name=%s",
+                registrationId, loginName, name);
+            return new RedirectServerAuthenticationSuccessHandler(redirectUri);
         }
 
         private Mono<Void> createConnection(WebFilterExchange webFilterExchange,
