@@ -24,6 +24,7 @@ public interface UserConnectionService {
     Mono<UserConnection> createConnection(String username,
         OAuth2LoginAuthenticationToken authentication);
 
-
     Flux<UserConnection> removeConnection(String registrationId);
+
+    Mono<Boolean> isConnected(String registrationId, String providerUserId);
 }

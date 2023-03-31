@@ -1,7 +1,10 @@
 package run.halo.oauth;
 
+import static org.apache.commons.lang3.StringUtils.defaultString;
 import static run.halo.oauth.SocialServerOauth2AuthorizationRequestResolver.SOCIAL_CONNECTION;
 
+import java.nio.charset.StandardCharsets;
+import java.util.Map;
 import org.apache.commons.lang3.StringUtils;
 import org.springframework.lang.NonNull;
 import org.springframework.security.authentication.ReactiveAuthenticationManager;
@@ -15,6 +18,7 @@ import org.springframework.security.oauth2.client.OAuth2AuthorizedClient;
 import org.springframework.security.oauth2.client.authentication.OAuth2LoginAuthenticationToken;
 import org.springframework.security.oauth2.client.web.server.ServerOAuth2AuthorizedClientRepository;
 import org.springframework.security.oauth2.client.web.server.authentication.OAuth2LoginAuthenticationWebFilter;
+import org.springframework.security.oauth2.core.user.OAuth2User;
 import org.springframework.security.web.server.WebFilterExchange;
 import org.springframework.security.web.server.authentication.AuthenticationWebFilter;
 import org.springframework.security.web.server.authentication.RedirectServerAuthenticationSuccessHandler;
@@ -22,8 +26,12 @@ import org.springframework.security.web.server.authentication.ServerAuthenticati
 import org.springframework.security.web.server.context.ServerSecurityContextRepository;
 import org.springframework.stereotype.Component;
 import org.springframework.util.Assert;
+import org.springframework.util.LinkedMultiValueMap;
+import org.springframework.util.MultiValueMap;
 import org.springframework.web.server.ServerWebExchange;
 import org.springframework.web.server.WebFilterChain;
+import org.springframework.web.util.UriComponentsBuilder;
+import org.springframework.web.util.UriUtils;
 import reactor.core.publisher.Mono;
 import run.halo.app.infra.exception.AccessDeniedException;
 import run.halo.app.security.AdditionalWebFilter;
@@ -132,9 +140,41 @@ public class Oauth2Authenticator implements AdditionalWebFilter {
                                 .onAuthenticationSuccess(webFilterExchange, authentication)
                             );
                     }
-                    return mappedToSystemUserAuthentication(registrationId, authenticationResult)
-                        .flatMap(result -> handleAuthenticationSuccess(result, webFilterExchange));
+                    return userConnectionService.isConnected(registrationId,
+                            authenticationResult.getName())
+                        .flatMap(connected -> {
+                            if (connected) {
+                                // login
+                                return mappedToSystemUserAuthentication(registrationId,
+                                    authenticationResult)
+                                    .flatMap(result -> handleAuthenticationSuccess(result,
+                                        webFilterExchange));
+                            }
+                            // signup
+                            OAuth2User principal = authenticationResult.getPrincipal();
+                            return registrationPageHandler(registrationId, principal)
+                                .onAuthenticationSuccess(webFilterExchange, authentication);
+                        });
                 }));
+        }
+
+        private ServerAuthenticationSuccessHandler registrationPageHandler(String registrationId,
+                                                                           OAuth2User oauth2User) {
+            Assert.notNull(registrationId, "registrationId cannot be null");
+            Assert.notNull(oauth2User, "oauth2User cannot be null");
+
+            String loginName = oauth2User.getName();
+            String name = defaultString(oauth2User.getAttribute("name"), loginName);
+            MultiValueMap<String, String> queryParams = new LinkedMultiValueMap<>();
+            queryParams.add("login", loginName);
+            queryParams.add("name", name);
+
+            String redirectUri = UriComponentsBuilder.fromPath("/console#/binding/{registrationId}")
+                .uriVariables(Map.of("registrationId", registrationId))
+                .queryParams(UriUtils.encodeQueryParams(queryParams))
+                .build()
+                .toUriString();
+            return new RedirectServerAuthenticationSuccessHandler(redirectUri);
         }
 
         private Mono<Void> createConnection(WebFilterExchange webFilterExchange,

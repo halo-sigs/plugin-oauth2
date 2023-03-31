@@ -9,7 +9,6 @@ import org.springframework.stereotype.Component;
 import org.springframework.util.Assert;
 import reactor.core.publisher.Flux;
 import reactor.core.publisher.Mono;
-import run.halo.app.core.extension.AuthProvider;
 import run.halo.app.core.extension.UserConnection;
 import run.halo.app.extension.Metadata;
 import run.halo.app.extension.ReactiveExtensionClient;
@@ -65,6 +64,15 @@ public class UserConnectionServiceImpl implements UserConnectionService {
                         .then(Mono.defer(() -> client.delete(userConnection)));
                 })
             );
+    }
+
+    @Override
+    public Mono<Boolean> isConnected(String registrationId, String providerUserId) {
+        return client.list(UserConnection.class, persisted -> persisted.getSpec()
+                .getProviderUserId().equals(providerUserId)
+                && persisted.getSpec().getRegistrationId().equals(registrationId), null)
+            .next()
+            .hasElement();
     }
 
     Flux<UserConnection> listByRegistrationIdAndUsername(String registrationId, String username) {
