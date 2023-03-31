@@ -79,6 +79,7 @@ public class UserConnectionEndpoint implements CustomEndpoint {
     Mono<ServerResponse> disconnect(ServerRequest request) {
         String registrationId = request.pathVariable("registrationId");
         return userConnectionService.removeConnection(registrationId)
+            .collectList()
             .flatMap(result -> ServerResponse.ok()
                 .contentType(MediaType.APPLICATION_JSON)
                 .bodyValue(result)

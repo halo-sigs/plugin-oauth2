@@ -1,6 +1,7 @@
 package run.halo.oauth;
 
 import org.springframework.security.oauth2.client.authentication.OAuth2LoginAuthenticationToken;
+import reactor.core.publisher.Flux;
 import reactor.core.publisher.Mono;
 import run.halo.app.core.extension.UserConnection;
 
@@ -23,8 +24,7 @@ public interface UserConnectionService {
     Mono<UserConnection> createConnection(String username,
         OAuth2LoginAuthenticationToken authentication);
 
-
-    Mono<UserConnection> removeConnection(String registrationId);
+    Flux<UserConnection> removeConnection(String registrationId);
 
     Mono<Boolean> isConnected(String registrationId, String providerUserId);
 }

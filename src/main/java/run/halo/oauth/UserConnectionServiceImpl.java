@@ -6,8 +6,9 @@ import org.springframework.security.core.context.ReactiveSecurityContextHolder;
 import org.springframework.security.oauth2.client.authentication.OAuth2LoginAuthenticationToken;
 import org.springframework.security.oauth2.core.user.OAuth2User;
 import org.springframework.stereotype.Component;
+import org.springframework.util.Assert;
+import reactor.core.publisher.Flux;
 import reactor.core.publisher.Mono;
-import run.halo.app.core.extension.AuthProvider;
 import run.halo.app.core.extension.UserConnection;
 import run.halo.app.extension.Metadata;
 import run.halo.app.extension.ReactiveExtensionClient;
@@ -30,13 +31,15 @@ public class UserConnectionServiceImpl implements UserConnectionService {
     @Override
     public Mono<UserConnection> createConnection(String username,
                                                  OAuth2LoginAuthenticationToken authentication) {
+        Assert.notNull(authentication, "OAuth2LoginAuthenticationToken must not be null");
         if (StringUtils.isBlank(username)) {
             throw new AccessDeniedException(
                 "Binding cannot be completed without user authentication");
         }
 
         UserConnection connection = convert(username, authentication);
-        return fetchUserConnection(username, connection.getSpec().getRegistrationId())
+        String providerUserId = authentication.getPrincipal().getName();
+        return fetchUserConnection(connection.getSpec().getRegistrationId(), providerUserId)
             .flatMap(persisted -> {
                 connection.getMetadata().setName(persisted.getMetadata().getName());
                 connection.getMetadata()
@@ -47,18 +50,18 @@ public class UserConnectionServiceImpl implements UserConnectionService {
     }
 
     @Override
-    public Mono<UserConnection> removeConnection(String registrationId) {
+    public Flux<UserConnection> removeConnection(String registrationId) {
         return ReactiveSecurityContextHolder.getContext()
             .map(securityContext -> securityContext.getAuthentication().getName())
             .switchIfEmpty(Mono.error(
                 new AccessDeniedException("Cannot disconnect without user authentication"))
             )
-            .flatMap(username -> fetchUserConnection(registrationId, username)
+            .flatMapMany(username -> listByRegistrationIdAndUsername(registrationId, username)
                 .flatMap(userConnection -> {
                     String providerUserId = userConnection.getSpec().getProviderUserId();
                     return oauth2LoginConfiguration.getAuthorizedClientService()
                         .removeAuthorizedClient(registrationId, providerUserId)
-                        .then(client.delete(userConnection));
+                        .then(Mono.defer(() -> client.delete(userConnection)));
                 })
             );
     }
@@ -72,9 +75,15 @@ public class UserConnectionServiceImpl implements UserConnectionService {
             .hasElement();
     }
 
-    private Mono<UserConnection> fetchUserConnection(String registrationId, String username) {
+    Flux<UserConnection> listByRegistrationIdAndUsername(String registrationId, String username) {
         return client.list(UserConnection.class, persisted -> persisted.getSpec()
-                .getUsername().equals(username)
+            .getRegistrationId().equals(registrationId)
+            && persisted.getSpec().getUsername().equals(username), null);
+    }
+
+    private Mono<UserConnection> fetchUserConnection(String registrationId, String providerUserId) {
+        return client.list(UserConnection.class, persisted -> persisted.getSpec()
+                .getProviderUserId().equals(providerUserId)
                 && persisted.getSpec().getRegistrationId().equals(registrationId), null)
             .next();
     }
