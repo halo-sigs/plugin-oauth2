@@ -63,27 +63,13 @@ public class UserConnectionServiceImpl implements UserConnectionService {
             );
     }
 
-    private Mono<ListedConnection> convertTo(UserConnection userConnection) {
-        String registrationId = userConnection.getSpec().getRegistrationId();
-        var builder = ListedConnection.builder()
-            .displayName(userConnection.getSpec().getDisplayName())
-            .avatarUrl(userConnection.getSpec().getAvatarUrl())
-            .username(userConnection.getSpec().getProviderUserId())
-            .profileUrl(userConnection.getSpec().getProfileUrl())
-            .registrationId(userConnection.getSpec().getRegistrationId());
-        return client.fetch(AuthProvider.class, registrationId)
-            .map(authProvider -> ListedConnection.SimpleAuthProvider.builder()
-                .displayName(authProvider.getSpec().getDisplayName())
-                .logo(authProvider.getSpec().getLogo())
-                .website(authProvider.getSpec().getWebsite())
-                .helpPage(authProvider.getSpec().getHelpPage())
-                .authenticationUrl(authProvider.getSpec().getAuthenticationUrl())
-                .build()
-            )
-            .map(provider -> {
-                builder.provider(provider);
-                return builder.build();
-            });
+    @Override
+    public Mono<Boolean> isConnected(String registrationId, String providerUserId) {
+        return client.list(UserConnection.class, persisted -> persisted.getSpec()
+                .getProviderUserId().equals(providerUserId)
+                && persisted.getSpec().getRegistrationId().equals(registrationId), null)
+            .next()
+            .hasElement();
     }
 
     private Mono<UserConnection> fetchUserConnection(String registrationId, String username) {
