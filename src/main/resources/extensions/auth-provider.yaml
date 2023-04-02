@@ -6,7 +6,7 @@ metadata:
     auth.halo.run/auth-binding: "true"
 spec:
   displayName: GitHub
-  description: GitHub Inc. is a web-based hosting service for version control using Git.
+  description: GitHub Inc. is an Internet hosting service for software development and version control using Git.
   logo: /plugins/plugin-oauth2/assets/static/github.svg
   website: https://github.com
   helpPage: https://docs.github.com/en/apps/oauth-apps/building-oauth-apps/creating-an-oauth-app
@@ -27,7 +27,7 @@ metadata:
     auth.halo.run/auth-binding: "true"
 spec:
   displayName: Gitee
-  description: Gitee is a software development collaboration platform for efficient project development.
+  description: Gitee is an online forge that allows software version control using Git and is intended primarily for the hosting of open source software.
   logo: /plugins/plugin-oauth2/assets/static/gitee.svg
   website: https://gitee.com
   authenticationUrl: /oauth2/authorization/gitee
@@ -47,7 +47,7 @@ metadata:
     auth.halo.run/auth-binding: "true"
 spec:
   displayName: GitLab
-  description: Gitee is a software development collaboration platform for efficient project development.
+  description: GitLab Inc. is an open-core company that operates GitLab, a DevOps software package which can develop, secure, and operate software.
   logo: /plugins/plugin-oauth2/assets/static/gitlab.svg
   website: https://gitlab.com
   authenticationUrl: /oauth2/authorization/gitlab
