@@ -14,11 +14,11 @@ Halo 2.0 的 OAuth2 第三方登录插件。
 
 目前支持的认证方式：
 
-| 服务商 | 文档                                                                                                                                                   | Halo 所需配置               | 回调地址                              |
-| ------ | ------------------------------------------------------------------------------------------------------------------------------------------------------ | --------------------------- | ------------------------------------- |
-| GitHub | [https://docs.github.com](https://docs.github.com/en/apps/oauth-apps/building-oauth-apps/creating-an-oauth-app)                                        | `Client ID` `Client Secret` | `<SITE_URL>/login/oauth2/code/github` |
-| GitLab | [https://docs.gitlab.com](https://docs.gitlab.com/ee/integration/oauth_provider.html#configure-gitlab-as-an-oauth-20-authentication-identity-provider) | `Client ID` `Client Secret` | `<SITE_URL>/login/oauth2/code/gitlab` |
-| Gitee  | <https://gitee.com/oauth/applications>                                                                                                                   | `Client ID` `Client Secret` | `<SITE_URL>/login/oauth2/code/gitee`  |
+| 服务商 | 文档                                                                                                                                                   | Halo 所需配置               | Scope        | 回调地址                              |
+| ------ | ------------------------------------------------------------------------------------------------------------------------------------------------------ | --------------------------- | ------------ | ------------------------------------- |
+| GitHub | [https://docs.github.com](https://docs.github.com/en/apps/oauth-apps/building-oauth-apps/creating-an-oauth-app)                                        | `Client ID` `Client Secret` | 无需手动设置 | `<SITE_URL>/login/oauth2/code/github` |
+| GitLab | [https://docs.gitlab.com](https://docs.gitlab.com/ee/integration/oauth_provider.html#configure-gitlab-as-an-oauth-20-authentication-identity-provider) | `Client ID` `Client Secret` | `read_user`  | `<SITE_URL>/login/oauth2/code/gitlab` |
+| Gitee  | <https://gitee.com/oauth/applications>                                                                                                                 | `Client ID` `Client Secret` | `user_info`  | `<SITE_URL>/login/oauth2/code/gitee`  |
 
 ## 开发环境
 
