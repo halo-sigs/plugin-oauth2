@@ -4,7 +4,6 @@ metadata:
   name: plugin-oauth2
 spec:
   enabled: true
-  version: 1.0.1
   requires: ">=2.4.0"
   author:
     name: Halo OSS Team
