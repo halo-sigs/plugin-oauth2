@@ -14,4 +14,5 @@ spec:
   displayName: "OAuth2 认证"
   description: "提供 OAuth2 认证方式"
   license:
-    - name: "MIT"
+    - name: "GPL-3.0"
+      url: "https://github.com/halo-sigs/plugin-oauth2/blob/main/LICENSE"
