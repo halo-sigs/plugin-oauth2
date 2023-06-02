@@ -169,7 +169,7 @@ public class Oauth2Authenticator implements AdditionalWebFilter {
             queryParams.add("login", loginName);
             queryParams.add("name", name);
 
-            String redirectUri = UriComponentsBuilder.fromPath("/console#/binding/{registrationId}")
+            String redirectUri = UriComponentsBuilder.fromPath("/console/binding/{registrationId}")
                 .uriVariables(Map.of("registrationId", registrationId))
                 .queryParams(UriUtils.encodeQueryParams(queryParams))
                 .build()
@@ -192,7 +192,7 @@ public class Oauth2Authenticator implements AdditionalWebFilter {
 
         private ServerAuthenticationSuccessHandler bindSuccessHandler(String redirectUri) {
             if (StringUtils.isBlank(redirectUri)) {
-                return new RedirectServerAuthenticationSuccessHandler("/console#/dashboard");
+                return new RedirectServerAuthenticationSuccessHandler("/console/dashboard");
             }
             return new RedirectServerAuthenticationSuccessHandler(redirectUri);
         }
