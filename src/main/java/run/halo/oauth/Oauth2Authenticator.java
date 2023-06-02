@@ -3,7 +3,6 @@ package run.halo.oauth;
 import static org.apache.commons.lang3.StringUtils.defaultString;
 import static run.halo.oauth.SocialServerOauth2AuthorizationRequestResolver.SOCIAL_CONNECTION;
 
-import java.nio.charset.StandardCharsets;
 import java.util.Map;
 import org.apache.commons.lang3.StringUtils;
 import org.springframework.lang.NonNull;
@@ -33,7 +32,6 @@ import org.springframework.web.server.WebFilterChain;
 import org.springframework.web.util.UriComponentsBuilder;
 import org.springframework.web.util.UriUtils;
 import reactor.core.publisher.Mono;
-import run.halo.app.infra.exception.AccessDeniedException;
 import run.halo.app.security.AdditionalWebFilter;
 
 /**

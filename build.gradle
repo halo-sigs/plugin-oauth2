@@ -9,36 +9,25 @@ sourceCompatibility = JavaVersion.VERSION_17
 
 repositories {
     maven { url 'https://s01.oss.sonatype.org/content/repositories/releases' }
+    maven { url 'https://s01.oss.sonatype.org/content/repositories/snapshots/' }
     maven { url 'https://repo.spring.io/milestone' }
     mavenCentral()
 }
 
-jar {
-    enabled = true
-    duplicatesStrategy = DuplicatesStrategy.EXCLUDE
-    manifest.attributes(
-            'Plugin-Version': "${project.version}",
-    )
-    from {
-        configurations.runtimeClasspath.collect {
-            it.isDirectory() ? it : zipTree(it)
-        }
-    }
-}
-
 dependencies {
-    compileOnly platform("run.halo.dependencies:halo-dependencies:1.0.0")
+    implementation platform('run.halo.tools.platform:plugin:2.5.0-SNAPSHOT')
+    compileOnly 'run.halo.app:api'
 
-    compileOnly 'org.springframework.security:spring-security-oauth2-client'
-    compileOnly files("lib/halo-2.4.0-SNAPSHOT-plain.jar")
-
-    testImplementation files("lib/halo-2.4.0-SNAPSHOT-plain.jar")
-    testImplementation 'org.springframework.security:spring-security-oauth2-client'
-    testImplementation platform("run.halo.dependencies:halo-dependencies:1.0.0")
+    testImplementation 'run.halo.app:api'
     testImplementation 'org.springframework.boot:spring-boot-starter-test'
+    testImplementation 'org.springframework.security:spring-security-oauth2-client'
     testImplementation 'io.projectreactor:reactor-test'
 }
 
 test {
     useJUnitPlatform()
+}
+
+halo {
+    version = '2.6.0'
 }

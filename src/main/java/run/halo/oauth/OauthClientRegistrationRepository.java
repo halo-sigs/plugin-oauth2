@@ -21,14 +21,12 @@ import reactor.core.publisher.Mono;
 import run.halo.app.core.extension.AuthProvider;
 import run.halo.app.extension.ConfigMap;
 import run.halo.app.extension.ReactiveExtensionClient;
-import run.halo.app.extension.store.ExtensionStore;
 import run.halo.app.infra.SystemSetting;
-import run.halo.app.infra.exception.NotFoundException;
 import run.halo.app.infra.utils.JsonUtils;
 
 /**
  * A reactive repository for OAuth 2.0 / OpenID Connect 1.0 ClientRegistration(s) that stores
- * {@link ClientRegistration}(s) in the {@link ExtensionStore}.
+ * {@link ClientRegistration}(s) in the {@link ReactiveExtensionClient}.
  *
  * @author guqing
  * @since 1.0.0
