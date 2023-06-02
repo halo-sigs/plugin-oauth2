@@ -106,13 +106,13 @@ public final class Oauth2LoginConfiguration {
 
         ServerAuthenticationSuccessHandler getAuthenticationSuccessHandler() {
             RedirectServerAuthenticationSuccessHandler handler =
-                new RedirectServerAuthenticationSuccessHandler("/console#/dashboard");
+                new RedirectServerAuthenticationSuccessHandler("/console/dashboard");
             handler.setRequestCache(requestCache);
             return handler;
         }
 
         ServerAuthenticationFailureHandler getAuthenticationFailureHandler() {
-            return new RedirectServerAuthenticationFailureHandler("/console#/login?error");
+            return new RedirectServerAuthenticationFailureHandler("/console/login?error");
         }
 
         GrantedAuthoritiesMapper getAuthoritiesMapper() {
