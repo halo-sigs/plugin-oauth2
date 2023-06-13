@@ -197,7 +197,7 @@ public class Oauth2Authenticator implements AdditionalWebFilter {
                                                     Authentication authentication,
                                                     String redirectUri) {
             return getRedirectUri(webFilterExchange.getExchange(), redirectUri)
-                .defaultIfEmpty(URI.create("/console/dashboard"))
+                .defaultIfEmpty(URI.create("/console"))
                 .flatMap(
                     uri -> redirectStrategy.sendRedirect(webFilterExchange.getExchange(), uri));
         }
@@ -221,7 +221,7 @@ public class Oauth2Authenticator implements AdditionalWebFilter {
                                                     Authentication authentication,
                                                     String redirectUri) {
             return getRedirectUri(webFilterExchange.getExchange(), redirectUri)
-                .defaultIfEmpty(URI.create("/console/dashboard"))
+                .defaultIfEmpty(URI.create("/console"))
                 .flatMap(uri ->
                     this.redirectStrategy.sendRedirect(webFilterExchange.getExchange(), uri)
                 )
