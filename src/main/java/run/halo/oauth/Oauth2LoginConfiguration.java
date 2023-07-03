@@ -1,12 +1,18 @@
 package run.halo.oauth;
 
+import java.net.URI;
+import java.util.Optional;
 import lombok.Getter;
+import org.apache.commons.lang3.StringUtils;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.http.server.reactive.ServerHttpRequest;
 import org.springframework.security.authentication.DelegatingReactiveAuthenticationManager;
 import org.springframework.security.authentication.ReactiveAuthenticationManager;
+import org.springframework.security.core.Authentication;
 import org.springframework.security.core.authority.mapping.GrantedAuthoritiesMapper;
 import org.springframework.security.core.authority.mapping.SimpleAuthorityMapper;
 import org.springframework.security.oauth2.client.ReactiveOAuth2AuthorizedClientService;
+import org.springframework.security.oauth2.client.authentication.OAuth2LoginAuthenticationToken;
 import org.springframework.security.oauth2.client.authentication.OAuth2LoginReactiveAuthenticationManager;
 import org.springframework.security.oauth2.client.endpoint.OAuth2AuthorizationCodeGrantRequest;
 import org.springframework.security.oauth2.client.endpoint.ReactiveOAuth2AccessTokenResponseClient;
@@ -34,6 +40,7 @@ import org.springframework.security.oauth2.core.user.OAuth2User;
 import org.springframework.security.oauth2.jwt.ReactiveJwtDecoderFactory;
 import org.springframework.security.web.server.DefaultServerRedirectStrategy;
 import org.springframework.security.web.server.ServerRedirectStrategy;
+import org.springframework.security.web.server.WebFilterExchange;
 import org.springframework.security.web.server.authentication.RedirectServerAuthenticationFailureHandler;
 import org.springframework.security.web.server.authentication.RedirectServerAuthenticationSuccessHandler;
 import org.springframework.security.web.server.authentication.ServerAuthenticationConverter;
@@ -45,6 +52,8 @@ import org.springframework.security.web.server.util.matcher.PathPatternParserSer
 import org.springframework.security.web.server.util.matcher.ServerWebExchangeMatcher;
 import org.springframework.stereotype.Component;
 import org.springframework.util.ClassUtils;
+import org.springframework.web.server.ServerWebExchange;
+import reactor.core.publisher.Mono;
 import run.halo.app.extension.ReactiveExtensionClient;
 
 /**
@@ -57,7 +66,6 @@ import run.halo.app.extension.ReactiveExtensionClient;
 @Component
 public final class Oauth2LoginConfiguration {
     private final ReactiveAuthenticationManager authenticationManager;
-    private final ServerAuthenticationSuccessHandler authenticationSuccessHandler;
     private final ServerAuthenticationFailureHandler authenticationFailureHandler;
     private final ServerWebExchangeMatcher authenticationMatcher;
     private final ServerOAuth2AuthorizedClientRepository authorizedClientRepository;
@@ -81,7 +89,6 @@ public final class Oauth2LoginConfiguration {
 
         Initializer initializer = new Initializer();
         this.authenticationManager = initializer.getAuthenticationManager();
-        this.authenticationSuccessHandler = initializer.getAuthenticationSuccessHandler();
         this.authenticationFailureHandler = initializer.getAuthenticationFailureHandler();
         this.authenticationMatcher = initializer.getAuthenticationMatcher();
         this.authorizedClientRepository = initializer.getAuthorizedClientRepository();
@@ -103,13 +110,6 @@ public final class Oauth2LoginConfiguration {
     }
 
     class Initializer {
-
-        ServerAuthenticationSuccessHandler getAuthenticationSuccessHandler() {
-            RedirectServerAuthenticationSuccessHandler handler =
-                new RedirectServerAuthenticationSuccessHandler("/console/dashboard");
-            handler.setRequestCache(requestCache);
-            return handler;
-        }
 
         ServerAuthenticationFailureHandler getAuthenticationFailureHandler() {
             return new RedirectServerAuthenticationFailureHandler("/console/login?error");
