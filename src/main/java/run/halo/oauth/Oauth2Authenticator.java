@@ -210,7 +210,7 @@ public class Oauth2Authenticator implements AdditionalWebFilter {
             SecurityContextImpl securityContext = new SecurityContextImpl();
             securityContext.setAuthentication(authentication);
             return securityContextRepository.save(exchange, securityContext)
-                .then(authenticationSuccessRedirection(webFilterExchange, authentication,
+                .then(authenticationSuccessRedirection(webFilterExchange,
                     redirectUri)
                 )
                 .contextWrite(
@@ -218,7 +218,6 @@ public class Oauth2Authenticator implements AdditionalWebFilter {
         }
 
         Mono<Void> authenticationSuccessRedirection(WebFilterExchange webFilterExchange,
-                                                    Authentication authentication,
                                                     String redirectUri) {
             return getRedirectUri(webFilterExchange.getExchange(), redirectUri)
                 .defaultIfEmpty(URI.create("/console"))
