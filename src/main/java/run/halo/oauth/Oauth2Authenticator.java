@@ -139,9 +139,7 @@ public class Oauth2Authenticator implements AdditionalWebFilter {
                     if (Boolean.parseBoolean(socialConnection)) {
                         // Social connect successfully, finish the process
                         return createConnection(webFilterExchange, authenticationResult)
-                            .then(handleBindSuccessHandler(webFilterExchange, authentication,
-                                bindingRedirectUri)
-                            );
+                            .then(handleBindSuccessHandler(webFilterExchange, bindingRedirectUri));
                     }
                     return userConnectionService.isConnected(registrationId,
                             authenticationResult.getName())
@@ -194,7 +192,6 @@ public class Oauth2Authenticator implements AdditionalWebFilter {
         }
 
         private Mono<Void> handleBindSuccessHandler(WebFilterExchange webFilterExchange,
-                                                    Authentication authentication,
                                                     String redirectUri) {
             return getRedirectUri(webFilterExchange.getExchange(), redirectUri)
                 .defaultIfEmpty(URI.create("/console"))
