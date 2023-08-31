@@ -20,6 +20,12 @@ Halo 2.0 的 OAuth2 第三方登录插件。
 | GitLab | [https://docs.gitlab.com](https://docs.gitlab.com/ee/integration/oauth_provider.html#configure-gitlab-as-an-oauth-20-authentication-identity-provider) | `Client ID` `Client Secret` | `read_user`  | `<SITE_URL>/login/oauth2/code/gitlab` |
 | Gitee  | <https://gitee.com/oauth/applications>                                                                                                                 | `Client ID` `Client Secret` | `user_info`  | `<SITE_URL>/login/oauth2/code/gitee`  |
 
+注意事项：
+
+1. 如果认证失败，回调地址请使用 `http` 尝试。
+2. <SITE_URL> 是不包含 `console` 的。
+3. 如果你用于部署的服务器无法访问 GitHub，那 GitHub 认证会失败，其它同理，请先确认连通性。
+
 ## 开发环境
 
 插件开发的详细文档请查阅：<https://docs.halo.run/developer-guide/plugin/hello-world>
