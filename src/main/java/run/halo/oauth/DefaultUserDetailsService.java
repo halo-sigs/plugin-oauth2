@@ -24,6 +24,8 @@ import run.halo.app.extension.ReactiveExtensionClient;
 @Component
 @RequiredArgsConstructor
 public class DefaultUserDetailsService implements ReactiveUserDetailsService {
+    public static final String AUTHENTICATED_ROLE_NAME = "authenticated";
+    public static final String ANONYMOUS_ROLE_NAME = "anonymous";
 
     private final ReactiveExtensionClient client;
 
@@ -35,6 +37,7 @@ public class DefaultUserDetailsService implements ReactiveUserDetailsService {
                 return listRoleRefs(subject)
                     .filter(this::isRoleRef)
                     .map(RoleBinding.RoleRef::getName)
+                    .concatWithValues(AUTHENTICATED_ROLE_NAME, ANONYMOUS_ROLE_NAME)
                     .collectList()
                     .map(roleNames -> org.springframework.security.core.userdetails.User.builder()
                         .username(username)
