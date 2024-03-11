@@ -1,7 +1,7 @@
 plugins {
     id 'java'
     id "io.freefair.lombok" version "8.0.1"
-    id "run.halo.plugin.devtools" version "0.0.4"
+    id "run.halo.plugin.devtools" version "0.0.7"
 }
 
 group 'run.halo.oauth'
@@ -29,5 +29,5 @@ test {
 }
 
 halo {
-    version = '2.6.0'
+    version = '2.13'
 }
