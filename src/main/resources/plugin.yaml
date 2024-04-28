@@ -2,14 +2,18 @@ apiVersion: plugin.halo.run/v1alpha1
 kind: Plugin
 metadata:
   name: plugin-oauth2
+  annotations:
+    store.halo.run/app-id: app-ESVDK
 spec:
   enabled: true
   requires: ">=2.6.0"
   author:
-    name: Halo OSS Team
+    name: Halo
     website: https://github.com/halo-dev
   logo: logo.svg
-  homepage: https://github.com/halo-sigs/plugin-oauth2
+  homepage: https://www.halo.run/store/apps/app-ESVDK
+  repo: https://github.com/halo-sigs/plugin-oauth2
+  issues: https://github.com/halo-sigs/plugin-oauth2/issues
   displayName: "OAuth2 认证"
   description: "提供 OAuth2 认证方式"
   license:
