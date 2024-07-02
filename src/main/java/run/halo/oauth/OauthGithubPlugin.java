@@ -1,10 +1,10 @@
 package run.halo.oauth;
 
-import org.pf4j.PluginWrapper;
 import org.springframework.stereotype.Component;
 import run.halo.app.extension.Scheme;
 import run.halo.app.extension.SchemeManager;
 import run.halo.app.plugin.BasePlugin;
+import run.halo.app.plugin.PluginContext;
 
 /**
  * Oauth GitHub plugin.
@@ -17,8 +17,8 @@ public class OauthGithubPlugin extends BasePlugin {
 
     private final SchemeManager schemeManager;
 
-    public OauthGithubPlugin(PluginWrapper wrapper, SchemeManager schemeManager) {
-        super(wrapper);
+    public OauthGithubPlugin(PluginContext pluginContext, SchemeManager schemeManager) {
+        super(pluginContext);
         this.schemeManager = schemeManager;
     }
 
