@@ -1,18 +1,13 @@
 package run.halo.oauth;
 
-import java.net.URI;
-import java.util.Optional;
 import lombok.Getter;
-import org.apache.commons.lang3.StringUtils;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.http.server.reactive.ServerHttpRequest;
 import org.springframework.security.authentication.DelegatingReactiveAuthenticationManager;
 import org.springframework.security.authentication.ReactiveAuthenticationManager;
-import org.springframework.security.core.Authentication;
+import org.springframework.security.core.AuthenticationException;
 import org.springframework.security.core.authority.mapping.GrantedAuthoritiesMapper;
 import org.springframework.security.core.authority.mapping.SimpleAuthorityMapper;
 import org.springframework.security.oauth2.client.ReactiveOAuth2AuthorizedClientService;
-import org.springframework.security.oauth2.client.authentication.OAuth2LoginAuthenticationToken;
 import org.springframework.security.oauth2.client.authentication.OAuth2LoginReactiveAuthenticationManager;
 import org.springframework.security.oauth2.client.endpoint.OAuth2AuthorizationCodeGrantRequest;
 import org.springframework.security.oauth2.client.endpoint.ReactiveOAuth2AccessTokenResponseClient;
@@ -26,12 +21,7 @@ import org.springframework.security.oauth2.client.registration.ReactiveClientReg
 import org.springframework.security.oauth2.client.userinfo.DefaultReactiveOAuth2UserService;
 import org.springframework.security.oauth2.client.userinfo.OAuth2UserRequest;
 import org.springframework.security.oauth2.client.userinfo.ReactiveOAuth2UserService;
-import org.springframework.security.oauth2.client.web.server.AuthenticatedPrincipalServerOAuth2AuthorizedClientRepository;
-import org.springframework.security.oauth2.client.web.server.OAuth2AuthorizationRequestRedirectWebFilter;
-import org.springframework.security.oauth2.client.web.server.ServerAuthorizationRequestRepository;
-import org.springframework.security.oauth2.client.web.server.ServerOAuth2AuthorizationCodeAuthenticationTokenConverter;
-import org.springframework.security.oauth2.client.web.server.ServerOAuth2AuthorizedClientRepository;
-import org.springframework.security.oauth2.client.web.server.WebSessionOAuth2ServerAuthorizationRequestRepository;
+import org.springframework.security.oauth2.client.web.server.*;
 import org.springframework.security.oauth2.core.OAuth2AuthenticationException;
 import org.springframework.security.oauth2.core.OAuth2AuthorizationException;
 import org.springframework.security.oauth2.core.endpoint.OAuth2AuthorizationRequest;
@@ -42,19 +32,17 @@ import org.springframework.security.web.server.DefaultServerRedirectStrategy;
 import org.springframework.security.web.server.ServerRedirectStrategy;
 import org.springframework.security.web.server.WebFilterExchange;
 import org.springframework.security.web.server.authentication.RedirectServerAuthenticationFailureHandler;
-import org.springframework.security.web.server.authentication.RedirectServerAuthenticationSuccessHandler;
 import org.springframework.security.web.server.authentication.ServerAuthenticationConverter;
 import org.springframework.security.web.server.authentication.ServerAuthenticationFailureHandler;
-import org.springframework.security.web.server.authentication.ServerAuthenticationSuccessHandler;
 import org.springframework.security.web.server.savedrequest.ServerRequestCache;
 import org.springframework.security.web.server.savedrequest.WebSessionServerRequestCache;
 import org.springframework.security.web.server.util.matcher.PathPatternParserServerWebExchangeMatcher;
 import org.springframework.security.web.server.util.matcher.ServerWebExchangeMatcher;
 import org.springframework.stereotype.Component;
 import org.springframework.util.ClassUtils;
-import org.springframework.web.server.ServerWebExchange;
 import reactor.core.publisher.Mono;
 import run.halo.app.extension.ReactiveExtensionClient;
+import run.halo.app.security.LoginHandlerEnhancer;
 
 /**
  * Oauth2 login configuration.
@@ -82,10 +70,14 @@ public final class Oauth2LoginConfiguration {
     private final OAuth2AuthorizationRequestRedirectWebFilter redirectWebFilter;
 
     private final ReactiveExtensionClient extensionClient;
+
+    private final LoginHandlerEnhancer loginHandlerEnhancer;
+
     private ServerRequestCache requestCache = new WebSessionServerRequestCache();
 
-    public Oauth2LoginConfiguration(ReactiveExtensionClient extensionClient) {
+    public Oauth2LoginConfiguration(ReactiveExtensionClient extensionClient, LoginHandlerEnhancer loginHandlerEnhancer) {
         this.extensionClient = extensionClient;
+        this.loginHandlerEnhancer = loginHandlerEnhancer;
 
         Initializer initializer = new Initializer();
         this.authenticationManager = initializer.getAuthenticationManager();
@@ -112,7 +104,14 @@ public final class Oauth2LoginConfiguration {
     class Initializer {
 
         ServerAuthenticationFailureHandler getAuthenticationFailureHandler() {
-            return new RedirectServerAuthenticationFailureHandler("/console/login?error");
+            return new RedirectServerAuthenticationFailureHandler("/console/login?error") {
+                @Override
+                public Mono<Void> onAuthenticationFailure(WebFilterExchange webFilterExchange,
+                                                          AuthenticationException exception) {
+                    return loginHandlerEnhancer.onLoginFailure(webFilterExchange.getExchange(), exception)
+                        .then(super.onAuthenticationFailure(webFilterExchange, exception));
+                }
+            };
         }
 
         GrantedAuthoritiesMapper getAuthoritiesMapper() {

@@ -37,6 +37,7 @@ import org.springframework.web.util.UriComponentsBuilder;
 import org.springframework.web.util.UriUtils;
 import reactor.core.publisher.Mono;
 import run.halo.app.security.AdditionalWebFilter;
+import run.halo.app.security.LoginHandlerEnhancer;
 
 /**
  * Oauth2 authenticator.
@@ -92,6 +93,10 @@ public class Oauth2Authenticator implements AdditionalWebFilter {
             oauth2LoginConfiguration.getAuthenticationFailureHandler());
         authenticationFilter.setSecurityContextRepository(this.securityContextRepository);
         return authenticationFilter;
+    }
+
+    private LoginHandlerEnhancer getLoginHandlerEnhancer() {
+        return oauth2LoginConfiguration.getLoginHandlerEnhancer();
     }
 
     class SocialLoginAuthenticationWebFilter extends OAuth2LoginAuthenticationWebFilter {
@@ -211,7 +216,8 @@ public class Oauth2Authenticator implements AdditionalWebFilter {
                     redirectUri)
                 )
                 .contextWrite(
-                    ReactiveSecurityContextHolder.withSecurityContext(Mono.just(securityContext)));
+                    ReactiveSecurityContextHolder.withSecurityContext(Mono.just(securityContext)))
+                .then(getLoginHandlerEnhancer().onLoginSuccess(exchange, authentication));
         }
 
         Mono<Void> authenticationSuccessRedirection(WebFilterExchange webFilterExchange,
