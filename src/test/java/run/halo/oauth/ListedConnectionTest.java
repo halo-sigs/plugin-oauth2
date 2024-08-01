@@ -1,8 +1,8 @@
 package run.halo.oauth;
 
-import static org.assertj.core.api.Assertions.assertThat;
-
 import org.junit.jupiter.api.Test;
+
+import static org.assertj.core.api.Assertions.assertThat;
 
 /**
  * Tests for {@link ListedConnection}.
@@ -16,24 +16,23 @@ class ListedConnectionTest {
     public void testBuilder() {
         // 创建测试数据
         ListedConnection.SimpleAuthProvider authProvider =
-            ListedConnection.SimpleAuthProvider.builder()
-                .displayName("testDisplayName")
-                .logo("testLogo")
-                .website("testWebsite")
-                .authenticationUrl("testAuthenticationUrl")
-                .helpPage("testHelpPage")
-                .build();
+                ListedConnection.SimpleAuthProvider.builder()
+                        .displayName("testDisplayName")
+                        .logo("testLogo")
+                        .website("testWebsite")
+                        .authenticationUrl("testAuthenticationUrl")
+                        .helpPage("testHelpPage")
+                        .build();
 
         ListedConnection connection = ListedConnection.builder()
-            .registrationId("testRegistrationId")
-            .username("testUsername")
-            .displayName("testDisplayName")
-            .profileUrl("testProfileUrl")
-            .avatarUrl("testAvatarUrl")
-            .provider(authProvider)
-            .build();
+                .registrationId("testRegistrationId")
+                .username("testUsername")
+                .displayName("testDisplayName")
+                .profileUrl("testProfileUrl")
+                .avatarUrl("testAvatarUrl")
+                .provider(authProvider)
+                .build();
 
-        // 验证对象的属性是否符合预期
         assertThat(connection.getRegistrationId()).isEqualTo("testRegistrationId");
         assertThat(connection.getUsername()).isEqualTo("testUsername");
         assertThat(connection.getDisplayName()).isEqualTo("testDisplayName");
@@ -43,7 +42,7 @@ class ListedConnectionTest {
         assertThat(connection.getProvider().getLogo()).isEqualTo("testLogo");
         assertThat(connection.getProvider().getWebsite()).isEqualTo("testWebsite");
         assertThat(connection.getProvider().getAuthenticationUrl()).isEqualTo(
-            "testAuthenticationUrl");
+                "testAuthenticationUrl");
         assertThat(connection.getProvider().getHelpPage()).isEqualTo("testHelpPage");
     }
 
@@ -51,14 +50,13 @@ class ListedConnectionTest {
     public void testValue() {
         // 创建测试数据
         ListedConnection.SimpleAuthProvider authProvider =
-            new ListedConnection.SimpleAuthProvider("testDisplayName",
-                "testLogo", "testWebsite", "testAuthenticationUrl", "testHelpPage");
+                new ListedConnection.SimpleAuthProvider("testDisplayName",
+                        "testLogo", "testWebsite", "testAuthenticationUrl", "testHelpPage");
 
         ListedConnection connection =
-            new ListedConnection("testRegistrationId", "testUsername", "testDisplayName",
-                "testProfileUrl", "testAvatarUrl", authProvider);
+                new ListedConnection("testRegistrationId", "testUsername", "testDisplayName",
+                        "testProfileUrl", "testAvatarUrl", authProvider);
 
-        // 验证对象的属性是否符合预期
         assertThat(connection.getRegistrationId()).isEqualTo("testRegistrationId");
         assertThat(connection.getUsername()).isEqualTo("testUsername");
         assertThat(connection.getDisplayName()).isEqualTo("testDisplayName");
@@ -68,7 +66,7 @@ class ListedConnectionTest {
         assertThat(connection.getProvider().getLogo()).isEqualTo("testLogo");
         assertThat(connection.getProvider().getWebsite()).isEqualTo("testWebsite");
         assertThat(connection.getProvider().getAuthenticationUrl()).isEqualTo(
-            "testAuthenticationUrl");
+                "testAuthenticationUrl");
         assertThat(connection.getProvider().getHelpPage()).isEqualTo("testHelpPage");
     }
 }

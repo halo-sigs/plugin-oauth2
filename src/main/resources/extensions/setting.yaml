@@ -15,3 +15,30 @@ spec:
           name: clientSecret
           label: "Client Secret"
           validation: required:trim
+    - group: giteaOauth
+      label: "自建 Gitea 配置"
+      formSchema:
+        - $formkit: text
+          name: clientId
+          label: "Client ID"
+          validation: required:trim
+        - $formkit: password
+          name: clientSecret
+          label: "Client Secret"
+          validation: required:trim
+        - $formkit: text
+          name: authorizationUri
+          label: "Authorization URI"
+          validation: required:trim
+        - $formkit: text
+          name: tokenUri
+          label: "Token URI"
+          validation: required:trim
+        - $formkit: text
+          name: userInfoUri
+          label: "User Info URI"
+          validation: required:trim
+        - $formkit: text
+          name: clientName
+          label: "Client Name"
+          validation: required:trim

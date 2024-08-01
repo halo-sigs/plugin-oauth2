@@ -58,3 +58,45 @@ spec:
     group: genericOauth
   configMapRef:
     name: oauth2-gitlab-config
+---
+apiVersion: auth.halo.run/v1alpha1
+kind: AuthProvider
+metadata:
+  name: gitea
+  labels:
+    auth.halo.run/auth-binding: "true"
+spec:
+  displayName: Gitea
+  description: Gitea is a community-managed lightweight code hosting solution written in Go.
+  logo: /plugins/plugin-oauth2/assets/static/gitea.svg
+  website: https://gitea.com
+  helpPage: https://gitea.com/.well-known/openid-configuration
+  authenticationUrl: /login/oauth/authorize
+  bindingUrl: /apis/api.plugin.halo.run/v1alpha1/plugins/plugin-oauth2/connect/gitea
+  unbindUrl: /apis/api.plugin.halo.run/v1alpha1/plugins/plugin-oauth2/disconnect/gitea
+  settingRef:
+    name: generic-oauth2-setting
+    group: genericOauth
+  configMapRef:
+    name: oauth2-gitea-config
+---
+apiVersion: auth.halo.run/v1alpha1
+kind: AuthProvider
+metadata:
+  name: open_source_gitea
+  labels:
+    auth.halo.run/auth-binding: "true"
+spec:
+  displayName: Gitea (Open Source)
+  description: Gitea is a community-managed lightweight code hosting solution written in Go.
+  logo: /plugins/plugin-oauth2/assets/static/gitea.svg
+  website: https://gitea.com
+  helpPage: https://gitea.com/.well-known/openid-configuration
+  authenticationUrl: /login/oauth/authorize
+  bindingUrl: /apis/api.plugin.halo.run/v1alpha1/plugins/plugin-oauth2/connect/open_source_gitea
+  unbindUrl: /apis/api.plugin.halo.run/v1alpha1/plugins/plugin-oauth2/disconnect/open_source_gitea
+  settingRef:
+    name: generic-oauth2-setting
+    group: giteaOauth
+  configMapRef:
+    name: oauth2-open-source-gitea-config

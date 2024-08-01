@@ -48,3 +48,41 @@ spec:
   userInfoAuthenticationMethod: "header"
   userNameAttributeName: "username"
   clientName: "GitLab"
+---
+apiVersion: oauth.halo.run/v1alpha1
+kind: Oauth2ClientRegistration
+metadata:
+  name: gitea
+spec:
+  clientAuthenticationMethod: "client_secret_basic"
+  authorizationGrantType: "authorization_code"
+  redirectUri: "{baseUrl}/login/oauth2/code/gitea"
+  scopes:
+    - "openid"
+    - "profile"
+    - "email"
+  authorizationUri: "https://gitea.com/login/oauth/authorize"
+  tokenUri: "https://gitea.com/login/oauth/access_token"
+  userInfoUri: "https://gitea.com/login/oauth/userinfo"
+  userInfoAuthenticationMethod: "header"
+  userNameAttributeName: "preferred_username"
+  clientName: "Gitea"
+---
+apiVersion: oauth.halo.run/v1alpha1
+kind: Oauth2ClientRegistration
+metadata:
+  name: open_source_gitea
+spec:
+  clientAuthenticationMethod: "client_secret_basic"
+  authorizationGrantType: "authorization_code"
+  redirectUri: "{baseUrl}/login/oauth2/code/open_source_gitea"
+  scopes:
+    - "openid"
+    - "profile"
+    - "email"
+  authorizationUri: "https://gitea.com/login/oauth/authorize"
+  tokenUri: "https://gitea.com/login/oauth/access_token"
+  userInfoUri: "https://gitea.com/login/oauth/userinfo"
+  userInfoAuthenticationMethod: "header"
+  userNameAttributeName: "preferred_username"
+  clientName: "Gitea"
