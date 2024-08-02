@@ -71,7 +71,7 @@ spec:
   logo: /plugins/plugin-oauth2/assets/static/gitea.svg
   website: https://gitea.com
   helpPage: https://gitea.com/.well-known/openid-configuration
-  authenticationUrl: /login/oauth/authorize
+  authenticationUrl: /oauth2/authorization/gitea
   bindingUrl: /apis/api.plugin.halo.run/v1alpha1/plugins/plugin-oauth2/connect/gitea
   unbindUrl: /apis/api.plugin.halo.run/v1alpha1/plugins/plugin-oauth2/disconnect/gitea
   settingRef:
@@ -92,7 +92,7 @@ spec:
   logo: /plugins/plugin-oauth2/assets/static/gitea.svg
   website: https://gitea.com
   helpPage: https://gitea.com/.well-known/openid-configuration
-  authenticationUrl: /login/oauth/authorize
+  authenticationUrl: /oauth2/authorization/open_source_gitea
   bindingUrl: /apis/api.plugin.halo.run/v1alpha1/plugins/plugin-oauth2/connect/open_source_gitea
   unbindUrl: /apis/api.plugin.halo.run/v1alpha1/plugins/plugin-oauth2/disconnect/open_source_gitea
   settingRef:

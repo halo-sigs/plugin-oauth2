@@ -41,4 +41,6 @@ spec:
         - $formkit: text
           name: clientName
           label: "Client Name"
-          validation: required:trim
+        - $formkit: text
+          name: jwkSetUri
+          label: "JSON Web Key Set"
