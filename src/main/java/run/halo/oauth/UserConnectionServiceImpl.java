@@ -8,7 +8,6 @@ import org.springframework.security.oauth2.client.authentication.OAuth2LoginAuth
 import org.springframework.security.oauth2.core.user.OAuth2User;
 import org.springframework.stereotype.Component;
 import org.springframework.util.Assert;
-import org.springframework.web.server.ServerWebInputException;
 import reactor.core.publisher.Flux;
 import reactor.core.publisher.Mono;
 import run.halo.app.core.extension.UserConnection;
@@ -31,7 +30,7 @@ public class UserConnectionServiceImpl implements UserConnectionService {
 
     @Override
     public Mono<UserConnection> createConnection(String username,
-                                                 OAuth2LoginAuthenticationToken authentication) {
+        OAuth2LoginAuthenticationToken authentication) {
         Assert.notNull(authentication, "OAuth2LoginAuthenticationToken must not be null");
         if (StringUtils.isBlank(username)) {
             throw new AccessDeniedException(

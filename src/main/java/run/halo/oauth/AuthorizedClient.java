@@ -18,7 +18,8 @@ import run.halo.app.extension.GVK;
  * @author guqing
  * @see InMemoryReactiveOAuth2AuthorizedClientService
  * @see OAuth2AuthorizedClient
- * @see <a href="https://github.com/spring-projects/spring-security/blob/8c17b978c881fb0df3961cbc7f4a01c6f97deede/oauth2/oauth2-client/src/main/resources/org/springframework/security/oauth2/client/oauth2-client-schema.sql#L1-L13>oauth2-client-schema.sql</a>
+ * @see
+ * <a href="https://github.com/spring-projects/spring-security/blob/8c17b978c881fb0df3961cbc7f4a01c6f97deede/oauth2/oauth2-client/src/main/resources/org/springframework/security/oauth2/client/oauth2-client-schema.sql#L1-L13>oauth2-client-schema.sql</a>
  * @since 1.0.0
  */
 @Data
