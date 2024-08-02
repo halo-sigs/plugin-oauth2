@@ -8,7 +8,6 @@ import org.springframework.security.oauth2.client.authentication.OAuth2LoginAuth
 import org.springframework.security.oauth2.core.user.OAuth2User;
 import org.springframework.stereotype.Component;
 import org.springframework.util.Assert;
-import org.springframework.web.server.ServerWebInputException;
 import reactor.core.publisher.Flux;
 import reactor.core.publisher.Mono;
 import run.halo.app.core.extension.UserConnection;
@@ -112,7 +111,8 @@ public class UserConnectionServiceImpl implements UserConnectionService {
 
         Oauth2UserProfile oauth2UserProfile =
             oauth2UserProfileMapperManager.mapProfile(registrationId, oauth2User);
-        spec.setDisplayName(oauth2UserProfile.getDisplayName());
+        var displayName = StringUtils.defaultIfBlank(oauth2UserProfile.getDisplayName(), username);
+        spec.setDisplayName(displayName);
         spec.setAvatarUrl(oauth2UserProfile.getAvatarUrl());
         spec.setProfileUrl(oauth2UserProfile.getProfileUrl());
         return userConnection;
