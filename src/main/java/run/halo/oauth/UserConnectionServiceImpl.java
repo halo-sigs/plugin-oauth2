@@ -8,6 +8,7 @@ import org.springframework.security.oauth2.client.authentication.OAuth2LoginAuth
 import org.springframework.security.oauth2.core.user.OAuth2User;
 import org.springframework.stereotype.Component;
 import org.springframework.util.Assert;
+import org.springframework.web.server.ServerWebInputException;
 import reactor.core.publisher.Flux;
 import reactor.core.publisher.Mono;
 import run.halo.app.core.extension.UserConnection;
@@ -39,14 +40,22 @@ public class UserConnectionServiceImpl implements UserConnectionService {
 
         UserConnection connection = convert(username, authentication);
         String providerUserId = authentication.getPrincipal().getName();
-        return fetchUserConnection(connection.getSpec().getRegistrationId(), providerUserId)
-            .flatMap(persisted -> {
-                connection.getMetadata().setName(persisted.getMetadata().getName());
-                connection.getMetadata()
-                    .setVersion(persisted.getMetadata().getVersion());
-                return client.update(connection);
-            })
-            .switchIfEmpty(Mono.defer(() -> client.create(connection)));
+        return findByRegistrationId(connection.getSpec().getRegistrationId())
+            .hasElement()
+            .flatMap(exists -> {
+                if (exists) {
+                    return Mono.error(new ServerWebInputException(
+                        "已经绑定过 " + connection.getSpec().getRegistrationId() + " 账号，请先解绑"));
+                }
+                return fetchUserConnection(connection.getSpec().getRegistrationId(), providerUserId)
+                    .flatMap(persisted -> {
+                        connection.getMetadata().setName(persisted.getMetadata().getName());
+                        connection.getMetadata()
+                            .setVersion(persisted.getMetadata().getVersion());
+                        return client.update(connection);
+                    })
+                    .switchIfEmpty(Mono.defer(() -> client.create(connection)));
+            });
     }
 
     @Override
@@ -81,6 +90,12 @@ public class UserConnectionServiceImpl implements UserConnectionService {
             && persisted.getSpec().getUsername().equals(username), null);
     }
 
+    private Mono<UserConnection> findByRegistrationId(String registrationId) {
+        return client.list(UserConnection.class,
+                persisted -> persisted.getSpec().getRegistrationId().equals(registrationId), null)
+            .next();
+    }
+
     private Mono<UserConnection> fetchUserConnection(String registrationId, String providerUserId) {
         return client.list(UserConnection.class, persisted -> persisted.getSpec()
                 .getProviderUserId().equals(providerUserId)
@@ -111,7 +126,8 @@ public class UserConnectionServiceImpl implements UserConnectionService {
 
         Oauth2UserProfile oauth2UserProfile =
             oauth2UserProfileMapperManager.mapProfile(registrationId, oauth2User);
-        spec.setDisplayName(oauth2UserProfile.getDisplayName());
+        var displayName = StringUtils.defaultIfBlank(oauth2UserProfile.getDisplayName(), username);
+        spec.setDisplayName(displayName);
         spec.setAvatarUrl(oauth2UserProfile.getAvatarUrl());
         spec.setProfileUrl(oauth2UserProfile.getProfileUrl());
         return userConnection;
