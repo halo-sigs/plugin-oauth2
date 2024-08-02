@@ -126,7 +126,8 @@ public class UserConnectionServiceImpl implements UserConnectionService {
 
         Oauth2UserProfile oauth2UserProfile =
             oauth2UserProfileMapperManager.mapProfile(registrationId, oauth2User);
-        spec.setDisplayName(oauth2UserProfile.getDisplayName());
+        var displayName = StringUtils.defaultIfBlank(oauth2UserProfile.getDisplayName(), username);
+        spec.setDisplayName(displayName);
         spec.setAvatarUrl(oauth2UserProfile.getAvatarUrl());
         spec.setProfileUrl(oauth2UserProfile.getProfileUrl());
         return userConnection;

@@ -1,5 +1,6 @@
 package run.halo.oauth;
 
+import static org.apache.commons.lang3.StringUtils.defaultIfBlank;
 import static org.apache.commons.lang3.StringUtils.defaultString;
 import static run.halo.oauth.SocialServerOauth2AuthorizationRequestResolver.SOCIAL_CONNECTION;
 
@@ -170,7 +171,7 @@ public class Oauth2Authenticator implements AdditionalWebFilter {
             Assert.notNull(oauth2User, "oauth2User cannot be null");
 
             String loginName = oauth2User.getName();
-            String name = defaultString(oauth2User.getAttribute("name"), loginName);
+            String name = defaultIfBlank(oauth2User.getAttribute("name"), loginName);
             MultiValueMap<String, String> queryParams = new LinkedMultiValueMap<>();
             queryParams.add("login", loginName);
             queryParams.add("name", name);
