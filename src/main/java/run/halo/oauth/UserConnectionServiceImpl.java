@@ -40,14 +40,22 @@ public class UserConnectionServiceImpl implements UserConnectionService {
 
         UserConnection connection = convert(username, authentication);
         String providerUserId = authentication.getPrincipal().getName();
-        return fetchUserConnection(connection.getSpec().getRegistrationId(), providerUserId)
-            .flatMap(persisted -> {
-                connection.getMetadata().setName(persisted.getMetadata().getName());
-                connection.getMetadata()
-                    .setVersion(persisted.getMetadata().getVersion());
-                return client.update(connection);
-            })
-            .switchIfEmpty(Mono.defer(() -> client.create(connection)));
+        return findByRegistrationId(connection.getSpec().getRegistrationId())
+            .hasElement()
+            .flatMap(exists -> {
+                if (exists) {
+                    return Mono.error(new ServerWebInputException(
+                        "已经绑定过 " + connection.getSpec().getRegistrationId() + " 账号，请先解绑"));
+                }
+                return fetchUserConnection(connection.getSpec().getRegistrationId(), providerUserId)
+                    .flatMap(persisted -> {
+                        connection.getMetadata().setName(persisted.getMetadata().getName());
+                        connection.getMetadata()
+                            .setVersion(persisted.getMetadata().getVersion());
+                        return client.update(connection);
+                    })
+                    .switchIfEmpty(Mono.defer(() -> client.create(connection)));
+            });
     }
 
     @Override
@@ -80,6 +88,12 @@ public class UserConnectionServiceImpl implements UserConnectionService {
         return client.list(UserConnection.class, persisted -> persisted.getSpec()
             .getRegistrationId().equals(registrationId)
             && persisted.getSpec().getUsername().equals(username), null);
+    }
+
+    private Mono<UserConnection> findByRegistrationId(String registrationId) {
+        return client.list(UserConnection.class,
+                persisted -> persisted.getSpec().getRegistrationId().equals(registrationId), null)
+            .next();
     }
 
     private Mono<UserConnection> fetchUserConnection(String registrationId, String providerUserId) {
