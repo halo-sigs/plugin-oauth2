@@ -37,7 +37,7 @@ public class DefaultSocialUserDetailsService implements SocialUserDetailsService
     }
 
     Mono<UserConnection> getUserConnectionByProviderUserId(String registrationId,
-                                                           String providerUserId) {
+        String providerUserId) {
         return client.list(UserConnection.class,
                 connection -> connection.getSpec().getRegistrationId().equals(registrationId)
                     && connection.getSpec().getProviderUserId().equals(providerUserId),

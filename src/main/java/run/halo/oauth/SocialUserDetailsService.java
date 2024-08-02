@@ -19,8 +19,8 @@ public interface SocialUserDetailsService {
      * Loads the user details by the user's identity at the provider.
      *
      * @param registrationId the {@link UserConnection.UserConnectionSpec#getRegistrationId()}
-     * @param principalName  the {@link UserConnection.UserConnectionSpec#getProviderUserId()} used
-     *                       to look up the user details
+     * @param principalName the {@link UserConnection.UserConnectionSpec#getProviderUserId()} used
+     * to look up the user details
      * @return the user details
      * @throws UsernameNotFoundException if the user details cannot be found
      */

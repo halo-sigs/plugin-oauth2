@@ -31,7 +31,7 @@ public class UserConnectionServiceImpl implements UserConnectionService {
 
     @Override
     public Mono<UserConnection> createConnection(String username,
-                                                 OAuth2LoginAuthenticationToken authentication) {
+        OAuth2LoginAuthenticationToken authentication) {
         Assert.notNull(authentication, "OAuth2LoginAuthenticationToken must not be null");
         if (StringUtils.isBlank(username)) {
             throw new AccessDeniedException(

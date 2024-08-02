@@ -24,7 +24,12 @@ import org.springframework.security.oauth2.client.registration.ReactiveClientReg
 import org.springframework.security.oauth2.client.userinfo.DefaultReactiveOAuth2UserService;
 import org.springframework.security.oauth2.client.userinfo.OAuth2UserRequest;
 import org.springframework.security.oauth2.client.userinfo.ReactiveOAuth2UserService;
-import org.springframework.security.oauth2.client.web.server.*;
+import org.springframework.security.oauth2.client.web.server.AuthenticatedPrincipalServerOAuth2AuthorizedClientRepository;
+import org.springframework.security.oauth2.client.web.server.OAuth2AuthorizationRequestRedirectWebFilter;
+import org.springframework.security.oauth2.client.web.server.ServerAuthorizationRequestRepository;
+import org.springframework.security.oauth2.client.web.server.ServerOAuth2AuthorizationCodeAuthenticationTokenConverter;
+import org.springframework.security.oauth2.client.web.server.ServerOAuth2AuthorizedClientRepository;
+import org.springframework.security.oauth2.client.web.server.WebSessionOAuth2ServerAuthorizationRequestRepository;
 import org.springframework.security.oauth2.core.OAuth2AuthenticationException;
 import org.springframework.security.oauth2.core.OAuth2AuthorizationException;
 import org.springframework.security.oauth2.core.endpoint.OAuth2AuthorizationRequest;
@@ -80,7 +85,8 @@ public final class Oauth2LoginConfiguration {
 
     private ServerRequestCache requestCache = new WebSessionServerRequestCache();
 
-    public Oauth2LoginConfiguration(ReactiveExtensionClient extensionClient, LoginHandlerEnhancer loginHandlerEnhancer) {
+    public Oauth2LoginConfiguration(ReactiveExtensionClient extensionClient,
+        LoginHandlerEnhancer loginHandlerEnhancer) {
         this.extensionClient = extensionClient;
         this.loginHandlerEnhancer = loginHandlerEnhancer;
 
@@ -112,12 +118,13 @@ public final class Oauth2LoginConfiguration {
             return new RedirectServerAuthenticationFailureHandler("/console/login?error") {
                 @Override
                 public Mono<Void> onAuthenticationFailure(WebFilterExchange webFilterExchange,
-                                                          AuthenticationException exception) {
+                    AuthenticationException exception) {
                     var queryParams = webFilterExchange.getExchange().getRequest().getQueryParams();
                     var response = new OAuth2ErrorResponse(queryParams);
                     log.error("An error occurred while attempting to oauth2 authenticate: \n{}",
                         response, Throwables.getRootCause(exception));
-                    return loginHandlerEnhancer.onLoginFailure(webFilterExchange.getExchange(), exception)
+                    return loginHandlerEnhancer.onLoginFailure(webFilterExchange.getExchange(),
+                            exception)
                         .then(super.onAuthenticationFailure(webFilterExchange, exception));
                 }
             };

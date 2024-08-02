@@ -57,7 +57,7 @@ public class DefaultOAuth2AuthorizedClientService implements ReactiveOAuth2Autho
 
     @Override
     public Mono<Void> saveAuthorizedClient(OAuth2AuthorizedClient authorizedClient,
-                                           Authentication principal) {
+        Authentication principal) {
         Assert.notNull(authorizedClient, "authorizedClient cannot be null");
         Assert.notNull(principal, "principal cannot be null");
         String registrationId = authorizedClient.getClientRegistration().getRegistrationId();

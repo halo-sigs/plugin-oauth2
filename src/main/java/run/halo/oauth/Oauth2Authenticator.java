@@ -55,9 +55,9 @@ public class Oauth2Authenticator implements AdditionalWebFilter {
     private final UserConnectionService userConnectionService;
 
     public Oauth2Authenticator(Oauth2LoginConfiguration oauth2LoginConfiguration,
-                               ServerSecurityContextRepository securityContextRepository,
-                               SocialUserDetailsService socialUserDetailsService,
-                               UserConnectionService userConnectionService) {
+        ServerSecurityContextRepository securityContextRepository,
+        SocialUserDetailsService socialUserDetailsService,
+        UserConnectionService userConnectionService) {
         this.oauth2LoginConfiguration = oauth2LoginConfiguration;
         this.securityContextRepository = securityContextRepository;
         this.socialUserDetailsService = socialUserDetailsService;
@@ -108,7 +108,7 @@ public class Oauth2Authenticator implements AdditionalWebFilter {
         /**
          * Creates an instance.
          *
-         * @param authenticationManager      the authentication manager to use
+         * @param authenticationManager the authentication manager to use
          * @param authorizedClientRepository optional authorized client repository to use
          */
         public SocialLoginAuthenticationWebFilter(
@@ -122,7 +122,7 @@ public class Oauth2Authenticator implements AdditionalWebFilter {
 
         @Override
         protected Mono<Void> onAuthenticationSuccess(Authentication authentication,
-                                                     WebFilterExchange webFilterExchange) {
+            WebFilterExchange webFilterExchange) {
             OAuth2LoginAuthenticationToken authenticationResult =
                 (OAuth2LoginAuthenticationToken) authentication;
             OAuth2AuthorizedClient authorizedClient = new OAuth2AuthorizedClient(
@@ -166,7 +166,7 @@ public class Oauth2Authenticator implements AdditionalWebFilter {
         }
 
         private ServerAuthenticationSuccessHandler registrationPageHandler(String registrationId,
-                                                                           OAuth2User oauth2User) {
+            OAuth2User oauth2User) {
             Assert.notNull(registrationId, "registrationId cannot be null");
             Assert.notNull(oauth2User, "oauth2User cannot be null");
 
@@ -185,7 +185,7 @@ public class Oauth2Authenticator implements AdditionalWebFilter {
         }
 
         private Mono<Void> createConnection(WebFilterExchange webFilterExchange,
-                                            OAuth2LoginAuthenticationToken authenticationToken) {
+            OAuth2LoginAuthenticationToken authenticationToken) {
             return securityContextRepository.load(webFilterExchange.getExchange())
                 .map(SecurityContext::getAuthentication)
                 .filter(Authentication::isAuthenticated)
@@ -198,7 +198,7 @@ public class Oauth2Authenticator implements AdditionalWebFilter {
         }
 
         private Mono<Void> handleBindSuccessHandler(WebFilterExchange webFilterExchange,
-                                                    String redirectUri) {
+            String redirectUri) {
             return getRedirectUri(webFilterExchange.getExchange(), redirectUri)
                 .defaultIfEmpty(URI.create("/console"))
                 .flatMap(
@@ -206,8 +206,8 @@ public class Oauth2Authenticator implements AdditionalWebFilter {
         }
 
         Mono<Void> handleAuthenticationSuccess(Authentication authentication,
-                                               WebFilterExchange webFilterExchange,
-                                               String redirectUri) {
+            WebFilterExchange webFilterExchange,
+            String redirectUri) {
             // Save the authentication result in the SecurityContext
             ServerWebExchange exchange = webFilterExchange.getExchange();
             SecurityContextImpl securityContext = new SecurityContextImpl();
@@ -222,7 +222,7 @@ public class Oauth2Authenticator implements AdditionalWebFilter {
         }
 
         Mono<Void> authenticationSuccessRedirection(WebFilterExchange webFilterExchange,
-                                                    String redirectUri) {
+            String redirectUri) {
             return getRedirectUri(webFilterExchange.getExchange(), redirectUri)
                 .defaultIfEmpty(URI.create("/console"))
                 .flatMap(uri ->
@@ -246,7 +246,7 @@ public class Oauth2Authenticator implements AdditionalWebFilter {
         }
 
         Mono<Authentication> mappedToSystemUserAuthentication(String registrationId,
-                                                              Authentication authentication) {
+            Authentication authentication) {
             return socialUserDetailsService.loadUserByUserId(registrationId,
                     authentication.getName())
                 .map(userDetails -> UsernamePasswordAuthenticationToken.authenticated(
