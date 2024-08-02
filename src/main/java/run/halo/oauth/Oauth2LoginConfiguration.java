@@ -1,6 +1,9 @@
 package run.halo.oauth;
 
+import com.google.common.base.Throwables;
 import lombok.Getter;
+import lombok.RequiredArgsConstructor;
+import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.security.authentication.DelegatingReactiveAuthenticationManager;
 import org.springframework.security.authentication.ReactiveAuthenticationManager;
@@ -40,6 +43,7 @@ import org.springframework.security.web.server.util.matcher.PathPatternParserSer
 import org.springframework.security.web.server.util.matcher.ServerWebExchangeMatcher;
 import org.springframework.stereotype.Component;
 import org.springframework.util.ClassUtils;
+import org.springframework.util.MultiValueMap;
 import reactor.core.publisher.Mono;
 import run.halo.app.extension.ReactiveExtensionClient;
 import run.halo.app.security.LoginHandlerEnhancer;
@@ -50,6 +54,7 @@ import run.halo.app.security.LoginHandlerEnhancer;
  * @author guqing
  * @since 1.0.0
  */
+@Slf4j
 @Getter
 @Component
 public final class Oauth2LoginConfiguration {
@@ -108,10 +113,40 @@ public final class Oauth2LoginConfiguration {
                 @Override
                 public Mono<Void> onAuthenticationFailure(WebFilterExchange webFilterExchange,
                                                           AuthenticationException exception) {
+                    var queryParams = webFilterExchange.getExchange().getRequest().getQueryParams();
+                    var response = new OAuth2ErrorResponse(queryParams);
+                    log.error("An error occurred while attempting to oauth2 authenticate: \n{}",
+                        response, Throwables.getRootCause(exception));
                     return loginHandlerEnhancer.onLoginFailure(webFilterExchange.getExchange(), exception)
                         .then(super.onAuthenticationFailure(webFilterExchange, exception));
                 }
             };
+        }
+
+        @RequiredArgsConstructor
+        static class OAuth2ErrorResponse {
+            private final MultiValueMap<String, String> queryParams;
+
+            public String error() {
+                return queryParams.getFirst("error");
+            }
+
+            public String errorDescription() {
+                return queryParams.getFirst("error_description");
+            }
+
+            public String errorUri() {
+                return queryParams.getFirst("error_uri");
+            }
+
+            @Override
+            public String toString() {
+                return """
+                    error: %s
+                    error_description: %s
+                    error_uri: %s
+                    """.formatted(error(), errorDescription(), errorUri());
+            }
         }
 
         GrantedAuthoritiesMapper getAuthoritiesMapper() {
