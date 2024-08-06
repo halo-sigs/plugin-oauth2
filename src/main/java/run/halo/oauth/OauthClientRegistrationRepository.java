@@ -65,13 +65,13 @@ public class OauthClientRegistrationRepository implements ReactiveClientRegistra
                         Mono.error(new ProviderNotFoundException(
                                 "Unsupported OAuth2 provider: " + registrationId)))
                 .flatMap(provider -> fetchEnabledProviders()
-                        .map(enabledNames -> {
-                            if (enabledNames.contains(registrationId)) {
-                                return provider;
+                        .doOnNext(enabledNames -> {
+                            if (!enabledNames.contains(registrationId)) {
+                                throw new OAuth2AuthenticationException(
+                                        "Authentication provider is not enabled: " + registrationId);
                             }
-                            throw new OAuth2AuthenticationException(
-                                    "Authentication provider is not enabled: " + registrationId);
                         })
+                        .thenReturn(provider)
                 )
                 .flatMap(this::getClientRegistrationMono);
     }
