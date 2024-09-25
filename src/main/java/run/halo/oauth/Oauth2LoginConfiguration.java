@@ -33,6 +33,7 @@ import org.springframework.security.oauth2.client.web.server.WebSessionOAuth2Ser
 import org.springframework.security.oauth2.core.OAuth2AuthenticationException;
 import org.springframework.security.oauth2.core.OAuth2AuthorizationException;
 import org.springframework.security.oauth2.core.endpoint.OAuth2AuthorizationRequest;
+import org.springframework.security.oauth2.core.endpoint.OAuth2ParameterNames;
 import org.springframework.security.oauth2.core.oidc.user.OidcUser;
 import org.springframework.security.oauth2.core.user.OAuth2User;
 import org.springframework.security.oauth2.jwt.ReactiveJwtDecoderFactory;
@@ -52,6 +53,8 @@ import org.springframework.util.MultiValueMap;
 import reactor.core.publisher.Mono;
 import run.halo.app.extension.ReactiveExtensionClient;
 import run.halo.app.security.LoginHandlerEnhancer;
+
+import static org.springframework.security.oauth2.core.endpoint.OAuth2ParameterNames.REGISTRATION_ID;
 
 /**
  * Oauth2 login configuration.
@@ -200,7 +203,7 @@ public final class Oauth2LoginConfiguration {
 
         ServerWebExchangeMatcher createAttemptAuthenticationRequestMatcher() {
             return new PathPatternParserServerWebExchangeMatcher(
-                "/login/oauth2/code/{registrationId}");
+                "/login/oauth2/code/{" + REGISTRATION_ID + "}");
         }
 
         ReactiveOAuth2UserService<OidcUserRequest, OidcUser> getOidcUserService() {
