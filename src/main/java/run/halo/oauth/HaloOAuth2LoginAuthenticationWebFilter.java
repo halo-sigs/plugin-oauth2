@@ -15,15 +15,14 @@ import org.springframework.security.oauth2.client.web.server.ServerOAuth2Authori
 import org.springframework.security.web.server.WebFilterExchange;
 import org.springframework.security.web.server.authentication.AuthenticationWebFilter;
 import reactor.core.publisher.Mono;
-import run.halo.app.core.extension.service.UserConnectionService;
+import run.halo.app.core.user.service.UserConnectionService;
 import run.halo.app.security.authentication.oauth2.HaloOAuth2AuthenticationToken;
 
-class HaloOAuth2LoginAuthenticationWebFilter
-    extends AuthenticationWebFilter {
+class HaloOAuth2LoginAuthenticationWebFilter extends AuthenticationWebFilter {
 
     private final ServerOAuth2AuthorizedClientRepository authorizedClientRepository;
 
-    private final run.halo.app.core.extension.service.UserConnectionService connectionService;
+    private final UserConnectionService connectionService;
 
     private final ReactiveUserDetailsService userDetailsService;
 

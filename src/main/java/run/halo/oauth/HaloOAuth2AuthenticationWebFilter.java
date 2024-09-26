@@ -13,7 +13,7 @@ import org.springframework.web.server.ServerWebExchange;
 import org.springframework.web.server.WebFilter;
 import org.springframework.web.server.WebFilterChain;
 import reactor.core.publisher.Mono;
-import run.halo.app.core.extension.service.UserConnectionService;
+import run.halo.app.core.user.service.UserConnectionService;
 import run.halo.app.security.AuthenticationSecurityWebFilter;
 
 @Component
@@ -23,15 +23,16 @@ public class HaloOAuth2AuthenticationWebFilter implements AuthenticationSecurity
 
     public HaloOAuth2AuthenticationWebFilter(Oauth2LoginConfiguration configuration,
         ServerSecurityContextRepository securityContextRepository,
-        UserConnectionService userConnectionService,
+        UserConnectionService connectionService,
         ReactiveUserDetailsService userDetailsService) {
         var authManager = new OAuth2LoginReactiveAuthenticationManager(
             new WebClientReactiveAuthorizationCodeTokenResponseClient(),
             new DefaultReactiveOAuth2UserService()
         );
         var filter = new HaloOAuth2LoginAuthenticationWebFilter(
-            authManager, configuration.getAuthorizedClientRepository(),
-            userConnectionService,
+            authManager,
+            configuration.getAuthorizedClientRepository(),
+            connectionService,
             userDetailsService
         );
         filter.setRequiresAuthenticationMatcher(configuration.getAuthenticationMatcher());
