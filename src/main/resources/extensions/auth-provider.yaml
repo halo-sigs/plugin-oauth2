@@ -11,8 +11,8 @@ spec:
   website: https://github.com
   helpPage: https://docs.github.com/en/apps/oauth-apps/building-oauth-apps/creating-an-oauth-app
   authenticationUrl: /oauth2/authorization/github
-  bindingUrl: /apis/api.plugin.halo.run/v1alpha1/plugins/plugin-oauth2/connect/github
-  unbindUrl: /apis/api.plugin.halo.run/v1alpha1/plugins/plugin-oauth2/disconnect/github
+  bindingUrl: /oauth2/authorization/github
+  unbindUrl: /apis/uc.api.auth.halo.run/v1alpha1/user-connections/github/disconnect
   settingRef:
     name: generic-oauth2-setting
     group: genericOauth
@@ -31,8 +31,8 @@ spec:
   logo: /plugins/plugin-oauth2/assets/static/gitee.svg
   website: https://gitee.com
   authenticationUrl: /oauth2/authorization/gitee
-  bindingUrl: /apis/api.plugin.halo.run/v1alpha1/plugins/plugin-oauth2/connect/gitee
-  unbindUrl: /apis/api.plugin.halo.run/v1alpha1/plugins/plugin-oauth2/disconnect/gitee
+  bindingUrl: /oauth2/authorization/gitee
+  unbindUrl: /apis/uc.api.auth.halo.run/v1alpha1/user-connections/gitee/disconnect
   settingRef:
     name: generic-oauth2-setting
     group: genericOauth
@@ -51,8 +51,8 @@ spec:
   logo: /plugins/plugin-oauth2/assets/static/gitlab.svg
   website: https://gitlab.com
   authenticationUrl: /oauth2/authorization/gitlab
-  bindingUrl: /apis/api.plugin.halo.run/v1alpha1/plugins/plugin-oauth2/connect/gitlab
-  unbindUrl: /apis/api.plugin.halo.run/v1alpha1/plugins/plugin-oauth2/disconnect/gitlab
+  bindingUrl: /oauth2/authorization/gitlab
+  unbindUrl: /apis/uc.api.auth.halo.run/v1alpha1/user-connections/gitlab/disconnect
   settingRef:
     name: generic-oauth2-setting
     group: genericOauth

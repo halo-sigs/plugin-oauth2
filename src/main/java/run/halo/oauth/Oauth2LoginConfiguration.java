@@ -1,10 +1,14 @@
 package run.halo.oauth;
 
+import static org.springframework.security.oauth2.core.endpoint.OAuth2ParameterNames.REGISTRATION_ID;
+
 import com.google.common.base.Throwables;
 import lombok.Getter;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.context.annotation.Configuration;
+import org.springframework.scheduling.annotation.EnableAsync;
 import org.springframework.security.authentication.DelegatingReactiveAuthenticationManager;
 import org.springframework.security.authentication.ReactiveAuthenticationManager;
 import org.springframework.security.core.AuthenticationException;
@@ -33,7 +37,6 @@ import org.springframework.security.oauth2.client.web.server.WebSessionOAuth2Ser
 import org.springframework.security.oauth2.core.OAuth2AuthenticationException;
 import org.springframework.security.oauth2.core.OAuth2AuthorizationException;
 import org.springframework.security.oauth2.core.endpoint.OAuth2AuthorizationRequest;
-import org.springframework.security.oauth2.core.endpoint.OAuth2ParameterNames;
 import org.springframework.security.oauth2.core.oidc.user.OidcUser;
 import org.springframework.security.oauth2.core.user.OAuth2User;
 import org.springframework.security.oauth2.jwt.ReactiveJwtDecoderFactory;
@@ -47,14 +50,11 @@ import org.springframework.security.web.server.savedrequest.ServerRequestCache;
 import org.springframework.security.web.server.savedrequest.WebSessionServerRequestCache;
 import org.springframework.security.web.server.util.matcher.PathPatternParserServerWebExchangeMatcher;
 import org.springframework.security.web.server.util.matcher.ServerWebExchangeMatcher;
-import org.springframework.stereotype.Component;
 import org.springframework.util.ClassUtils;
 import org.springframework.util.MultiValueMap;
 import reactor.core.publisher.Mono;
 import run.halo.app.extension.ReactiveExtensionClient;
 import run.halo.app.security.LoginHandlerEnhancer;
-
-import static org.springframework.security.oauth2.core.endpoint.OAuth2ParameterNames.REGISTRATION_ID;
 
 /**
  * Oauth2 login configuration.
@@ -64,8 +64,9 @@ import static org.springframework.security.oauth2.core.endpoint.OAuth2ParameterN
  */
 @Slf4j
 @Getter
-@Component
-public final class Oauth2LoginConfiguration {
+@Configuration
+@EnableAsync
+public class Oauth2LoginConfiguration {
     private final ReactiveAuthenticationManager authenticationManager;
     private final ServerAuthenticationFailureHandler authenticationFailureHandler;
     private final ServerWebExchangeMatcher authenticationMatcher;
