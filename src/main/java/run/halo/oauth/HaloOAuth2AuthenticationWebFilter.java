@@ -38,9 +38,9 @@ public class HaloOAuth2AuthenticationWebFilter implements AuthenticationSecurity
         var converter = new ServerOAuth2AuthorizationCodeAuthenticationTokenConverter(
             configuration.getClientRegistrationRepository()
         );
-        filter.setAuthenticationSuccessHandler(
-            new RedirectServerAuthenticationSuccessHandler("/uc")
-        );
+        var successHandler = new RedirectServerAuthenticationSuccessHandler("/uc");
+        successHandler.setRequestCache(configuration.getRequestCache());
+        filter.setAuthenticationSuccessHandler(successHandler);
         filter.setAuthenticationFailureHandler(
             new RedirectServerAuthenticationFailureHandler("/login?oauth2_error")
         );

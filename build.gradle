@@ -8,7 +8,6 @@ group 'run.halo.oauth'
 sourceCompatibility = JavaVersion.VERSION_17
 
 repositories {
-    mavenLocal()
     maven { url 'https://s01.oss.sonatype.org/content/repositories/releases' }
     maven { url 'https://s01.oss.sonatype.org/content/repositories/snapshots/' }
     maven { url 'https://repo.spring.io/milestone' }
@@ -16,7 +15,7 @@ repositories {
 }
 
 dependencies {
-    implementation platform('run.halo.tools.platform:plugin:2.20.0+local.6')
+    implementation platform('run.halo.tools.platform:plugin:2.20.0-SNAPSHOT')
     compileOnly 'run.halo.app:api'
 
     testImplementation 'run.halo.app:api'
