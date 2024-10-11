@@ -16,6 +16,7 @@ import org.springframework.util.StringUtils;
 import reactor.core.publisher.Mono;
 import run.halo.app.extension.Metadata;
 import run.halo.app.extension.ReactiveExtensionClient;
+import run.halo.app.security.authentication.oauth2.HaloOAuth2AuthenticationToken;
 
 /**
  * Implementations of this interface are responsible for the management of Authorized Client(s),
@@ -60,6 +61,9 @@ public class DefaultOAuth2AuthorizedClientService implements ReactiveOAuth2Autho
         Authentication principal) {
         Assert.notNull(authorizedClient, "authorizedClient cannot be null");
         Assert.notNull(principal, "principal cannot be null");
+        if (principal instanceof HaloOAuth2AuthenticationToken haloOAuthToken) {
+            principal = haloOAuthToken.getOriginal();
+        }
         String registrationId = authorizedClient.getClientRegistration().getRegistrationId();
         return client.fetch(AuthorizedClient.class,
                 authorizedClientName(registrationId, principal.getName())
