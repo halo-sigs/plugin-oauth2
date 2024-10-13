@@ -13,6 +13,7 @@ spec:
   authenticationUrl: /oauth2/authorization/github
   bindingUrl: /oauth2/authorization/github
   unbindUrl: /apis/uc.api.auth.halo.run/v1alpha1/user-connections/github/disconnect
+  authType: oauth2
   settingRef:
     name: generic-oauth2-setting
     group: genericOauth
@@ -33,6 +34,7 @@ spec:
   authenticationUrl: /oauth2/authorization/gitee
   bindingUrl: /oauth2/authorization/gitee
   unbindUrl: /apis/uc.api.auth.halo.run/v1alpha1/user-connections/gitee/disconnect
+  authType: oauth2
   settingRef:
     name: generic-oauth2-setting
     group: genericOauth
@@ -53,6 +55,7 @@ spec:
   authenticationUrl: /oauth2/authorization/gitlab
   bindingUrl: /oauth2/authorization/gitlab
   unbindUrl: /apis/uc.api.auth.halo.run/v1alpha1/user-connections/gitlab/disconnect
+  authType: oauth2
   settingRef:
     name: generic-oauth2-setting
     group: genericOauth
