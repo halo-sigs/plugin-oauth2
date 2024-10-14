@@ -53,7 +53,9 @@ class OauthClientRegistrationRepositoryTest {
             .thenReturn(Mono.just(authProvider));
         ConfigMap systemConfig = new ConfigMap();
         systemConfig.setData(Map.of(SystemSetting.AuthProvider.GROUP,
-            "{\"enabled\":[\"github\"]}"));
+            """
+                {"states":[{"name":"github", "enabled":true}]}\
+                """));
         when(client.fetch(eq(ConfigMap.class), eq(SystemSetting.SYSTEM_CONFIG)))
             .thenReturn(Mono.just(systemConfig));
 
