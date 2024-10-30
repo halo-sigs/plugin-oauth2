@@ -5,6 +5,8 @@ import static org.assertj.core.api.Assertions.assertThatThrownBy;
 import static org.mockito.ArgumentMatchers.eq;
 import static org.mockito.Mockito.when;
 
+import java.net.MalformedURLException;
+import java.net.URL;
 import java.util.Map;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
@@ -12,14 +14,14 @@ import org.mockito.InjectMocks;
 import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
 import org.springframework.security.authentication.ProviderNotFoundException;
-import org.springframework.security.config.oauth2.client.CommonOAuth2Provider;
-import org.springframework.security.oauth2.client.registration.ClientRegistration;
+import org.springframework.web.util.UriComponentsBuilder;
 import reactor.core.publisher.Mono;
 import reactor.test.StepVerifier;
 import run.halo.app.core.extension.AuthProvider;
 import run.halo.app.extension.ConfigMap;
 import run.halo.app.extension.Metadata;
 import run.halo.app.extension.ReactiveExtensionClient;
+import run.halo.app.infra.ExternalUrlSupplier;
 import run.halo.app.infra.SystemSetting;
 
 /**
@@ -32,11 +34,14 @@ class OauthClientRegistrationRepositoryTest {
     @Mock
     private ReactiveExtensionClient client;
 
+    @Mock
+    ExternalUrlSupplier externalUrlSupplier;
+
     @InjectMocks
     private OauthClientRegistrationRepository repository;
 
     @Test
-    void findByRegistrationId_withValidId_returnsClientRegistration() {
+    void findByRegistrationId_withValidId_returnsClientRegistration() throws MalformedURLException {
         AuthProvider authProvider = new AuthProvider();
         authProvider.setMetadata(new Metadata());
         authProvider.getMetadata().setName("github");
@@ -79,6 +84,20 @@ class OauthClientRegistrationRepositoryTest {
                 assertThat(clientRegistration.getRegistrationId()).isEqualTo("github");
                 assertThat(clientRegistration.getClientId()).isEqualTo("my-client-id");
                 assertThat(clientRegistration.getClientSecret()).isEqualTo("my-client-secret");
+                assertThat(clientRegistration.getRedirectUri()).isEqualTo(
+                    "{baseUrl}/{action}/oauth2/code/{registrationId}"
+                );
+            })
+            .expectComplete()
+            .verify();
+
+        when(externalUrlSupplier.getRaw()).thenReturn(new URL("https://www.halo.run/"));
+
+        StepVerifier.create(repository.findByRegistrationId("github"))
+            .assertNext(clientRegistration -> {
+                assertThat(clientRegistration.getRedirectUri()).isEqualTo(
+                    "https://www.halo.run/{action}/oauth2/code/{registrationId}"
+                );
             })
             .expectComplete()
             .verify();

@@ -16,6 +16,7 @@ import org.springframework.security.web.server.savedrequest.WebSessionServerRequ
 import org.springframework.security.web.server.util.matcher.PathPatternParserServerWebExchangeMatcher;
 import org.springframework.security.web.server.util.matcher.ServerWebExchangeMatcher;
 import run.halo.app.extension.ReactiveExtensionClient;
+import run.halo.app.infra.ExternalUrlSupplier;
 import run.halo.app.security.LoginHandlerEnhancer;
 
 /**
@@ -38,12 +39,16 @@ public class Oauth2LoginConfiguration {
 
     private final LoginHandlerEnhancer loginHandlerEnhancer;
 
+    private final ExternalUrlSupplier externalUrlSupplier;
+
     private ServerRequestCache requestCache = new WebSessionServerRequestCache();
 
     public Oauth2LoginConfiguration(ReactiveExtensionClient extensionClient,
-        LoginHandlerEnhancer loginHandlerEnhancer) {
+        LoginHandlerEnhancer loginHandlerEnhancer,
+        ExternalUrlSupplier externalUrlSupplier) {
         this.extensionClient = extensionClient;
         this.loginHandlerEnhancer = loginHandlerEnhancer;
+        this.externalUrlSupplier = externalUrlSupplier;
 
         Initializer initializer = new Initializer();
         this.authenticationMatcher = initializer.getAuthenticationMatcher();
@@ -69,7 +74,7 @@ public class Oauth2LoginConfiguration {
         }
 
         ReactiveClientRegistrationRepository getClientRegistrationRepository() {
-            return new OauthClientRegistrationRepository(extensionClient);
+            return new OauthClientRegistrationRepository(extensionClient, externalUrlSupplier);
         }
 
         ServerOAuth2AuthorizedClientRepository getAuthorizedClientRepository() {
