@@ -2,6 +2,7 @@ package run.halo.oauth;
 
 import static org.apache.commons.lang3.ObjectUtils.defaultIfNull;
 
+import java.net.URL;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
@@ -18,10 +19,12 @@ import org.springframework.security.oauth2.core.AuthorizationGrantType;
 import org.springframework.security.oauth2.core.ClientAuthenticationMethod;
 import org.springframework.security.oauth2.core.OAuth2AuthenticationException;
 import org.springframework.util.Assert;
+import org.springframework.web.util.UriComponentsBuilder;
 import reactor.core.publisher.Mono;
 import run.halo.app.core.extension.AuthProvider;
 import run.halo.app.extension.ConfigMap;
 import run.halo.app.extension.ReactiveExtensionClient;
+import run.halo.app.infra.ExternalUrlSupplier;
 import run.halo.app.infra.SystemSetting;
 import run.halo.app.infra.utils.JsonUtils;
 
@@ -36,6 +39,7 @@ import run.halo.app.infra.utils.JsonUtils;
 public class OauthClientRegistrationRepository implements ReactiveClientRegistrationRepository {
     static final String DEFAULT_REDIRECT_URL = "{baseUrl}/{action}/oauth2/code/{registrationId}";
     private final ReactiveExtensionClient client;
+    private final ExternalUrlSupplier externalUrlSupplier;
 
     @Override
     public Mono<ClientRegistration> findByRegistrationId(String registrationId) {
@@ -133,6 +137,15 @@ public class OauthClientRegistrationRepository implements ReactiveClientRegistra
                 "The clientRegistration in AuthProvider must not be null");
         }
         Oauth2ClientRegistration.Oauth2ClientRegistrationSpec spec = registration.getSpec();
+        var redirectUri = defaultIfNull(spec.getRedirectUri(), DEFAULT_REDIRECT_URL);
+        var externalUrl = externalUrlSupplier.getRaw();
+        if (externalUrl != null) {
+            // rewrite redirect URI if external Url is configured.
+            redirectUri = UriComponentsBuilder.fromUriString(redirectUri)
+                .uriVariables(Map.of("baseUrl", StringUtils.removeEnd(externalUrl.toString(), "/")))
+                .build()
+                .toString();
+        }
         return ClientRegistration.withRegistrationId(registration.getMetadata().getName())
             .clientName(spec.getClientName())
             .clientAuthenticationMethod(
@@ -144,7 +157,7 @@ public class OauthClientRegistrationRepository implements ReactiveClientRegistra
             .authorizationUri(spec.getAuthorizationUri())
             .issuerUri(spec.getIssuerUri())
             .jwkSetUri(spec.getJwkSetUri())
-            .redirectUri(defaultIfNull(spec.getRedirectUri(), DEFAULT_REDIRECT_URL))
+            .redirectUri(redirectUri)
             .scope(spec.getScopes())
             .tokenUri(spec.getTokenUri())
             .userInfoAuthenticationMethod(

@@ -5,6 +5,7 @@ import static org.mockito.Mockito.mock;
 
 import org.junit.jupiter.api.Test;
 import run.halo.app.extension.ReactiveExtensionClient;
+import run.halo.app.infra.ExternalUrlSupplier;
 import run.halo.app.security.LoginHandlerEnhancer;
 
 /**
@@ -19,8 +20,9 @@ class Oauth2LoginConfigurationTest {
     void constructor() {
         ReactiveExtensionClient extensionClient = mock(ReactiveExtensionClient.class);
         var loginHandlerEnhancer = mock(LoginHandlerEnhancer.class);
+        var externalUrlSupplier = mock(ExternalUrlSupplier.class);
         Oauth2LoginConfiguration oauth2LoginConfiguration =
-            new Oauth2LoginConfiguration(extensionClient, loginHandlerEnhancer);
+            new Oauth2LoginConfiguration(extensionClient, loginHandlerEnhancer, externalUrlSupplier);
         assertNotNull(oauth2LoginConfiguration);
     }
 
