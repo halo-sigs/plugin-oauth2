@@ -48,3 +48,20 @@ spec:
   userInfoAuthenticationMethod: "header"
   userNameAttributeName: "username"
   clientName: "GitLab"
+---
+apiVersion: oauth.halo.run/v1alpha1
+kind: Oauth2ClientRegistration
+metadata:
+  name: sso
+spec:
+  clientAuthenticationMethod: "client_secret_basic"
+  authorizationGrantType: "authorization_code"
+  redirectUri: "{baseUrl}/login/oauth2/code/sso"
+  scopes:
+    - "profile"
+  authorizationUri: "https://example.com/login/oauth/authorize"
+  tokenUri: "https://example.com/api/login/oauth/access_token"
+  userInfoUri: "https://example.com/api/user"
+  userInfoAuthenticationMethod: "header"
+  userNameAttributeName: "name"
+  clientName: "SSO"
