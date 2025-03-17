@@ -2,7 +2,6 @@ package run.halo.oauth;
 
 import static org.apache.commons.lang3.ObjectUtils.defaultIfNull;
 
-import java.net.URL;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
@@ -38,6 +37,7 @@ import run.halo.app.infra.utils.JsonUtils;
 @RequiredArgsConstructor
 public class OauthClientRegistrationRepository implements ReactiveClientRegistrationRepository {
     static final String DEFAULT_REDIRECT_URL = "{baseUrl}/{action}/oauth2/code/{registrationId}";
+    static final String SSO_PROVIDER_NAME = "sso";
     private final ReactiveExtensionClient client;
     private final ExternalUrlSupplier externalUrlSupplier;
 
@@ -63,49 +63,101 @@ public class OauthClientRegistrationRepository implements ReactiveClientRegistra
         Assert.notNull(authProvider, "The authProvider must not be null");
         final AuthProvider.ConfigMapRef configMapKeyRef = authProvider.getSpec().getConfigMapRef();
         final String group = authProvider.getSpec().getSettingRef().getGroup();
+        final String name = authProvider.getMetadata().getName();
         return client.fetch(ConfigMap.class, configMapKeyRef.getName())
             .map(ConfigMap::getData)
-            .map(data -> {
-                String value = data.get(group);
-                if (StringUtils.isBlank(value)) {
-                    return new ClientIdSecretPair("", "");
-                }
-                return JsonUtils.jsonToObject(value, ClientIdSecretPair.class);
-            })
             .switchIfEmpty(
                 Mono.error(new IllegalArgumentException(
                     "ConfigMap " + configMapKeyRef.getName() + " not found")
                 )
             )
-            .flatMap(idSecretPair -> {
-                if (StringUtils.isBlank(idSecretPair.clientId())) {
-                    return Mono.error(new IllegalArgumentException("clientId must not be blank"));
+            .flatMap(data -> {
+                String value = data.getOrDefault(group, "{}");
+                if(SSO_PROVIDER_NAME.equals(name)) {
+                    SsoClientConf ssoClientConf = JsonUtils.jsonToObject(value, SsoClientConf.class);
+                    return SsoClientRegistration(ssoClientConf, authProvider);
                 }
-                if (StringUtils.isBlank(idSecretPair.clientSecret())) {
-                    return Mono.error(
-                        new IllegalArgumentException("clientSecret must not be blank"));
-                }
-                String registrationId = authProvider.getMetadata().getName();
-                return client.fetch(Oauth2ClientRegistration.class, registrationId)
-                    .switchIfEmpty(Mono.error(new NotFoundException(
-                        "Oauth2 client registration " + registrationId + " not found")
-                    ))
-                    .map(oauth2ClientRegistration -> clientRegistrationBuilder(
-                        oauth2ClientRegistration)
-                        .clientId(idSecretPair.clientId())
-                        .clientSecret(idSecretPair.clientSecret())
-                        .build()
-                    );
+
+                GenericClientConf genericClientConf = JsonUtils.jsonToObject(value, GenericClientConf.class);
+                return GenericClientRegistration(genericClientConf, authProvider);
             });
     }
 
-    record ClientIdSecretPair(String clientId, String clientSecret) {
-        ClientIdSecretPair {
+    private Mono<ClientRegistration> GenericClientRegistration(GenericClientConf genericClientConf, AuthProvider authProvider) {
+        if (StringUtils.isBlank(genericClientConf.clientId())) {
+            return Mono.error(new IllegalArgumentException("clientId must not be blank"));
+        }
+        if (StringUtils.isBlank(genericClientConf.clientSecret())) {
+            return Mono.error(
+                new IllegalArgumentException("clientSecret must not be blank"));
+        }
+        String registrationId = authProvider.getMetadata().getName();
+        return client.fetch(Oauth2ClientRegistration.class, registrationId)
+            .switchIfEmpty(Mono.error(new NotFoundException(
+                "Oauth2 client registration " + registrationId + " not found")
+            ))
+            .map(oauth2ClientRegistration -> clientRegistrationBuilder(
+                oauth2ClientRegistration)
+                .clientId(genericClientConf.clientId())
+                .clientSecret(genericClientConf.clientSecret())
+                .build()
+            );
+    }
+
+    private Mono<ClientRegistration> SsoClientRegistration(SsoClientConf ssoClientConf, AuthProvider authProvider) {
+        String registrationId = authProvider.getMetadata().getName();
+        return client.fetch(Oauth2ClientRegistration.class, registrationId)
+            .switchIfEmpty(Mono.error(new NotFoundException(
+                "Oauth2 client registration " + registrationId + " not found")
+            ))
+            .map(oauth2ClientRegistration -> clientRegistrationBuilder(
+                oauth2ClientRegistration)
+                .clientId(ssoClientConf.clientId())
+                .clientSecret(ssoClientConf.clientSecret())
+                .authorizationUri(ssoClientConf.authorizationUrl())
+                .tokenUri(ssoClientConf.tokenUrl())
+                .userInfoUri(ssoClientConf.userInfoUrl())
+                .scope(ssoClientConf.scopes())
+                .userNameAttributeName(ssoClientConf.userNameAttribute())
+                .build()
+            );
+    }
+
+    record GenericClientConf(String clientId, String clientSecret) {
+        GenericClientConf {
             if (StringUtils.isBlank(clientId)) {
                 throw new IllegalArgumentException("clientId must not be blank");
             }
             if (StringUtils.isBlank(clientSecret)) {
                 throw new IllegalArgumentException("clientSecret must not be blank");
+            }
+        }
+    }
+
+    record SsoClientConf(String clientId, String clientSecret, String authorizationUrl,
+                         String tokenUrl, String userInfoUrl, String scopes,
+                         String userNameAttribute) {
+        SsoClientConf {
+            if (StringUtils.isBlank(clientId)) {
+                throw new IllegalArgumentException("clientId must not be blank");
+            }
+            if (StringUtils.isBlank(clientSecret)) {
+                throw new IllegalArgumentException("clientSecret must not be blank");
+            }
+            if (StringUtils.isBlank(authorizationUrl)) {
+                throw new IllegalArgumentException("authorizationUrl must not be blank");
+            }
+            if (StringUtils.isBlank(tokenUrl)) {
+                throw new IllegalArgumentException("tokenUrl must not be blank");
+            }
+            if (StringUtils.isBlank(userInfoUrl)) {
+                throw new IllegalArgumentException("userInfoUrl must not be blank");
+            }
+            if (StringUtils.isBlank(scopes)) {
+                throw new IllegalArgumentException("scopes must not be blank");
+            }
+            if (StringUtils.isBlank(userNameAttribute)) {
+                throw new IllegalArgumentException("userNameAttribute must not be blank");
             }
         }
     }

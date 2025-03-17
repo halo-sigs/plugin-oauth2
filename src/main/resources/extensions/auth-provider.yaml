@@ -61,3 +61,23 @@ spec:
     group: genericOauth
   configMapRef:
     name: oauth2-gitlab-config
+---
+apiVersion: auth.halo.run/v1alpha1
+kind: AuthProvider
+metadata:
+  name: sso
+  labels:
+    auth.halo.run/auth-binding: "true"
+spec:
+  displayName: SSO
+  description: Custom Single Sign-On (SSO) OAuth2 Provider.
+  logo: /plugins/plugin-oauth2/assets/static/sso.svg
+  authenticationUrl: /oauth2/authorization/sso
+  bindingUrl: /oauth2/authorization/sso
+  unbindUrl: /apis/uc.api.auth.halo.run/v1alpha1/user-connections/sso/disconnect
+  authType: oauth2
+  settingRef:
+    name: sso-oauth2-setting
+    group: ssoOauth
+  configMapRef:
+    name: oauth2-sso-config

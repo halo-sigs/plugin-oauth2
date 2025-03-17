@@ -15,3 +15,48 @@ spec:
           name: clientSecret
           label: "Client Secret"
           validation: required:trim
+---
+apiVersion: v1alpha1
+kind: Setting
+metadata:
+  name: sso-oauth2-setting
+spec:
+  forms:
+    - group: ssoOauth
+      label: "自定义单点登录 OAuth 配置"
+      formSchema:
+        - $formkit: text
+          name: clientId
+          label: "Client ID"
+          validation: required:trim
+          value: "client_id"
+        - $formkit: password
+          name: clientSecret
+          label: "Client Secret"
+          validation: required:trim
+          value: "client_secret"
+        - $formkit: text
+          name: authorizationUrl
+          label: "Authorization Url"
+          validation: required:trim
+          value: "https://example.com/login/oauth/authorize"
+        - $formkit: text
+          name: tokenUrl
+          label: "Token Url"
+          validation: required:trim
+          value: "https://example.com/api/login/oauth/access_token"
+        - $formkit: text
+          name: userInfoUrl
+          label: "UserInfo Url"
+          validation: required:trim
+          value: "https://example.com/api/user"
+        - $formkit: text
+          name: scopes
+          label: "Scopes"
+          validation: required:trim
+          value: "profile"
+        - $formkit: text
+          name: userNameAttribute
+          label: "UserName Attribute"
+          validation: required:trim
+          value: "name"
