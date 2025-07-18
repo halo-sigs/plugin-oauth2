@@ -25,9 +25,11 @@ public class HaloOAuth2RedirectWebFilter implements HttpBasicSecurityWebFilter {
     private static OAuth2AuthorizationRequestRedirectWebFilter createDelegate(
         Oauth2LoginConfiguration configuration
     ) {
-        return new OAuth2AuthorizationRequestRedirectWebFilter(
+        var filter = new OAuth2AuthorizationRequestRedirectWebFilter(
             configuration.getClientRegistrationRepository()
         );
+        filter.setRequestCache(configuration.getRequestCache());
+        return filter;
     }
 
 }
