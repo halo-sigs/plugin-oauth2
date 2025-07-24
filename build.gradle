@@ -1,11 +1,22 @@
 plugins {
     id 'java'
-    id "io.freefair.lombok" version "8.0.1"
-    id "run.halo.plugin.devtools" version "0.4.1"
+    id "io.freefair.lombok" version "8.14"
+    id "run.halo.plugin.devtools" version "0.6.2"
 }
 
 group 'run.halo.oauth'
 sourceCompatibility = JavaVersion.VERSION_17
+
+java {
+    toolchain {
+        languageVersion = JavaLanguageVersion.of(17)
+    }
+}
+
+tasks.withType(JavaCompile).configureEach {
+    options.encoding = 'UTF-8'
+    options.release.set(17)
+}
 
 repositories {
     maven { url 'https://s01.oss.sonatype.org/content/repositories/releases' }
