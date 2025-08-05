@@ -2,8 +2,10 @@ package run.halo.oauth;
 
 import com.nimbusds.oauth2.sdk.ParseException;
 import com.nimbusds.oauth2.sdk.util.JSONObjectUtils;
+import io.netty.channel.ChannelOption;
 import lombok.extern.slf4j.Slf4j;
 import net.minidev.json.JSONObject;
+import org.springframework.http.client.reactive.ReactorClientHttpConnector;
 import org.springframework.security.authentication.DelegatingReactiveAuthenticationManager;
 import org.springframework.security.core.AuthenticationException;
 import org.springframework.security.oauth2.client.authentication.OAuth2LoginReactiveAuthenticationManager;
@@ -20,10 +22,14 @@ import org.springframework.security.web.server.authentication.RedirectServerAuth
 import org.springframework.security.web.server.authentication.RedirectServerAuthenticationSuccessHandler;
 import org.springframework.security.web.server.context.ServerSecurityContextRepository;
 import org.springframework.stereotype.Component;
+import org.springframework.util.StringUtils;
+import org.springframework.web.reactive.function.client.WebClient;
 import org.springframework.web.server.ServerWebExchange;
 import org.springframework.web.server.WebFilter;
 import org.springframework.web.server.WebFilterChain;
 import reactor.core.publisher.Mono;
+import reactor.netty.http.client.HttpClient;
+import reactor.netty.transport.ProxyProvider;
 import run.halo.app.security.AuthenticationSecurityWebFilter;
 
 /**
@@ -39,8 +45,35 @@ public class HaloOAuth2AuthenticationWebFilter implements AuthenticationSecurity
     private final WebFilter delegate;
 
     public HaloOAuth2AuthenticationWebFilter(Oauth2LoginConfiguration configuration,
-        ServerSecurityContextRepository securityContextRepository) {
+        ServerSecurityContextRepository securityContextRepository,
+        OAuth2Properties oAuth2Properties) {
+
+        var proxy = oAuth2Properties.getProxy();
+        var client = HttpClient.create()
+            .option(ChannelOption.CONNECT_TIMEOUT_MILLIS, 15_000);
+        if (proxy.isEnabled()) {
+            client = client.proxy(typeSpec -> {
+                    var builder = typeSpec.type(ProxyProvider.Proxy.HTTP)
+                        .host(proxy.getHost())
+                        .port(proxy.getPort());
+                    if (StringUtils.hasText(proxy.getUsername())) {
+                        builder.username(proxy.getUsername())
+                            .password(u -> proxy.getPassword());
+                    }
+                    if (proxy.getConnectTimeoutMillis() != null
+                        && proxy.getConnectTimeoutMillis() > 0) {
+                        builder.connectTimeoutMillis(proxy.getConnectTimeoutMillis());
+                    }
+                }
+            );
+        }
+        var webClient = WebClient.builder()
+            .clientConnector(new ReactorClientHttpConnector(client))
+            .build();
+
         var accessTokenResponseClient = new WebClientReactiveAuthorizationCodeTokenResponseClient();
+        accessTokenResponseClient.setWebClient(webClient);
+
         var oauth2AuthManager = new OAuth2LoginReactiveAuthenticationManager(
             accessTokenResponseClient,
             new DefaultReactiveOAuth2UserService()
