@@ -5,6 +5,7 @@ import static org.springframework.security.oauth2.core.endpoint.OAuth2ParameterN
 import lombok.Getter;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.boot.context.properties.EnableConfigurationProperties;
 import org.springframework.context.annotation.Configuration;
 import org.springframework.scheduling.annotation.EnableAsync;
 import org.springframework.security.oauth2.client.ReactiveOAuth2AuthorizedClientService;
@@ -29,6 +30,7 @@ import run.halo.app.security.LoginHandlerEnhancer;
 @Getter
 @Configuration
 @EnableAsync
+@EnableConfigurationProperties(OAuth2Properties.class)
 public class Oauth2LoginConfiguration {
     private final ServerWebExchangeMatcher authenticationMatcher;
     private final ServerOAuth2AuthorizedClientRepository authorizedClientRepository;

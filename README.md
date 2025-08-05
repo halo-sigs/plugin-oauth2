@@ -24,7 +24,24 @@ Halo 2.0 的 OAuth2 第三方登录插件。
 
 1. 如果认证失败，回调地址请使用 `http` 尝试。
 2. <SITE_URL> 是不包含 `console` 的。
-3. 如果你用于部署的服务器无法访问 GitHub，那 GitHub 认证会失败，其它同理，请先确认连通性。
+3. 如果你用于部署的服务器无法访问 GitHub，那 GitHub 认证会失败，其它同理，请先确认连通性。请尝试配置代理。
+
+## 代理配置（可选）
+
+如果你部署的 Halo 服务器无法直接访问 GitHub、GitLab 或 Gitee 的 API，你可以配置代理。
+
+配置路径示例：`${Halo 工作目录}/plugins/configs/plugin-oauth2.yaml`。配置示例如下所示：
+
+```yaml
+oauth2:
+  proxy:
+    enabled: true # 是否启用代理
+    host: "host.halo.run" # 代理服务器主机名
+    port: 6666 # 代理服务器端口
+    username: "proxy-username" # 代理服务器用户名（可选）
+    password: "proxy-password"  # 代理服务器密码（可选）
+    connect-timeout-millis: 10000 # 连接超时时间，单位：毫秒（可选）
+```
 
 ## 开发环境
 
