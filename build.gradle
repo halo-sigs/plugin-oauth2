@@ -1,38 +1,35 @@
 plugins {
     id 'java'
-    id "io.freefair.lombok" version "8.14"
+    id "io.freefair.lombok" version "9.2.0"
     id "run.halo.plugin.devtools" version "0.6.2"
 }
 
 group 'run.halo.oauth'
-sourceCompatibility = JavaVersion.VERSION_17
 
 java {
     toolchain {
-        languageVersion = JavaLanguageVersion.of(17)
+        languageVersion = JavaLanguageVersion.of(21)
     }
 }
 
 tasks.withType(JavaCompile).configureEach {
     options.encoding = 'UTF-8'
-    options.release.set(17)
+    options.release.set(21)
 }
 
 repositories {
-    maven { url 'https://s01.oss.sonatype.org/content/repositories/releases' }
-    maven { url 'https://s01.oss.sonatype.org/content/repositories/snapshots/' }
-    maven { url 'https://repo.spring.io/milestone' }
     mavenCentral()
 }
 
 dependencies {
-    implementation platform('run.halo.tools.platform:plugin:2.20.0-SNAPSHOT')
+    implementation platform('run.halo.tools.platform:plugin:2.22.0')
     compileOnly 'run.halo.app:api'
 
     testImplementation 'run.halo.app:api'
     testImplementation 'org.springframework.boot:spring-boot-starter-test'
     testImplementation 'org.springframework.security:spring-security-oauth2-client'
     testImplementation 'io.projectreactor:reactor-test'
+    testRuntimeOnly 'org.junit.platform:junit-platform-launcher'
 }
 
 test {
@@ -40,6 +37,6 @@ test {
 }
 
 halo {
-    version = '2.20'
+    version = '2.22'
     debug = true
 }
