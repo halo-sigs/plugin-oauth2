@@ -55,6 +55,7 @@ spec:
           label: "Scopes"
           validation: required:trim
           value: "profile"
+          help: "Space or comma separated list of scopes. E.g., 'openid,profile' or 'openid profile'"
         - $formkit: text
           name: userNameAttribute
           label: "UserName Attribute"
