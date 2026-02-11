@@ -1,6 +1,6 @@
 # plugin-oauth2
 
-Halo 2.0 的 OAuth2 第三方登录插件。
+Halo 2.0 的 OAuth2/OIDC 第三方登录插件。
 
 ## 使用方法
 
@@ -14,11 +14,14 @@ Halo 2.0 的 OAuth2 第三方登录插件。
 
 目前支持的认证方式：
 
-| 服务商 | 文档                                                                                                                                                   | Halo 所需配置               | Scope        | 回调地址                              |
-| ------ | ------------------------------------------------------------------------------------------------------------------------------------------------------ | --------------------------- | ------------ | ------------------------------------- |
-| GitHub | [https://docs.github.com](https://docs.github.com/en/apps/oauth-apps/building-oauth-apps/creating-an-oauth-app)                                        | `Client ID` `Client Secret` | 无需手动设置 | `<SITE_URL>/login/oauth2/code/github` |
-| GitLab | [https://docs.gitlab.com](https://docs.gitlab.com/ee/integration/oauth_provider.html#configure-gitlab-as-an-oauth-20-authentication-identity-provider) | `Client ID` `Client Secret` | `read_user`  | `<SITE_URL>/login/oauth2/code/gitlab` |
-| Gitee  | <https://gitee.com/oauth/applications>                                                                                                                 | `Client ID` `Client Secret` | `user_info`  | `<SITE_URL>/login/oauth2/code/gitee`  |
+| 服务商                                     | 文档                                                                                                                                                   | Halo 所需配置                                                                                            | Scope            | 回调地址                               |
+| ------------------------------------------ | ------------------------------------------------------------------------------------------------------------------------------------------------------ | -------------------------------------------------------------------------------------------------------- | ---------------- | -------------------------------------- |
+| GitHub                                     | [https://docs.github.com](https://docs.github.com/en/apps/oauth-apps/building-oauth-apps/creating-an-oauth-app)                                        | `Client ID` `Client Secret`                                                                              | 无需手动设置     | `<SITE_URL>/login/oauth2/code/github`  |
+| Google                                     | [https://developers.google.com](https://developers.google.com/identity/openid-connect/openid-connect)                                                  | `Client ID` `Client Secret`                                                                              | 无需手动设置     | `<SITE_URL>/login/oauth2/code/google`  |
+| GitLab                                     | [https://docs.gitlab.com](https://docs.gitlab.com/ee/integration/oauth_provider.html#configure-gitlab-as-an-oauth-20-authentication-identity-provider) | `Client ID` `Client Secret`                                                                              | `read_user`      | `<SITE_URL>/login/oauth2/code/gitlab`  |
+| Gitee                                      | [https://gitee.com](https://gitee.com/api/v5/oauth_doc#/)                                                                                              | `Client ID` `Client Secret`                                                                              | `user_info`      | `<SITE_URL>/login/oauth2/code/gitee`   |
+| LINUX DO                                   | [https://wiki.linux.do](https://wiki.linux.do/Community/LinuxDoConnect)                                                                                | `Client ID` `Client Secret`                                                                              | 无需手动设置     | `<SITE_URL>/login/oauth2/code/linuxdo` |
+| SSO（任意 OAuth2 / OpenID Connect 提供商） | 通用 OAuth2 / OpenID Connect（参见 [RFC 6749](https://www.rfc-editor.org/rfc/rfc6749) / OIDC 文档）                                                    | `Client ID` `Client Secret` `Authorization URI` `Token URI` `UserInfo Url` `Scopes` `UserName Attribute` | 按提供商要求设置 | `<SITE_URL>/login/oauth2/code/sso`     |
 
 注意事项：
 
@@ -28,7 +31,13 @@ Halo 2.0 的 OAuth2 第三方登录插件。
 
 ## 代理配置（可选）
 
-如果你部署的 Halo 服务器无法直接访问 GitHub、GitLab 或 Gitee 的 API，你可以配置代理。
+如果你部署的 Halo 服务器无法直接访问 GitHub、GitLab、Gitee 或 LINUX DO 的 API，你可以配置代理。
+
+代理配置将应用于所有 OAuth2/OIDC 请求，包括：
+- Token 交换请求
+- 用户信息请求
+- OIDC JWKS (JSON Web Key Set) 获取
+- OIDC Issuer 发现
 
 配置路径示例：`${Halo 工作目录}/plugins/configs/plugin-oauth2.yaml`。配置示例如下所示：
 

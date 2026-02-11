@@ -18,6 +18,26 @@ spec:
 apiVersion: oauth.halo.run/v1alpha1
 kind: Oauth2ClientRegistration
 metadata:
+  name: google
+spec:
+  clientAuthenticationMethod: "client_secret_basic"
+  authorizationGrantType: "authorization_code"
+  redirectUri: "{baseUrl}/login/oauth2/code/google"
+  scopes:
+    - "openid"
+    - "profile"
+  authorizationUri: "https://accounts.google.com/o/oauth2/v2/auth"
+  tokenUri: "https://oauth2.googleapis.com/token"
+  userInfoUri: "https://openidconnect.googleapis.com/v1/userinfo"
+  userInfoAuthenticationMethod: "header"
+  userNameAttributeName: "sub"
+  issuerUri: "https://accounts.google.com"
+  jwkSetUri: "https://www.googleapis.com/oauth2/v3/certs"
+  clientName: "Google"
+---
+apiVersion: oauth.halo.run/v1alpha1
+kind: Oauth2ClientRegistration
+metadata:
   name: gitee
 spec:
   clientAuthenticationMethod: "client_secret_basic"
@@ -48,6 +68,26 @@ spec:
   userInfoAuthenticationMethod: "header"
   userNameAttributeName: "username"
   clientName: "GitLab"
+---
+apiVersion: oauth.halo.run/v1alpha1
+kind: Oauth2ClientRegistration
+metadata:
+  name: linuxdo
+spec:
+  clientAuthenticationMethod: "client_secret_basic"
+  authorizationGrantType: "authorization_code"
+  redirectUri: "{baseUrl}/login/oauth2/code/linuxdo"
+  scopes:
+    - "openid"
+    - "profile"
+  authorizationUri: "https://connect.linux.do/oauth2/authorize"
+  tokenUri: "https://connect.linux.do/oauth2/token"
+  userInfoUri: "https://connect.linux.do/api/user"
+  userInfoAuthenticationMethod: "header"
+  userNameAttributeName: "sub"
+  issuerUri: "https://connect.linux.do/"
+  jwkSetUri: "https://connect.linux.do/.well-known/jwks.json"
+  clientName: "LINUX DO"
 ---
 apiVersion: oauth.halo.run/v1alpha1
 kind: Oauth2ClientRegistration

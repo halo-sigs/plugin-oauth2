@@ -23,6 +23,28 @@ spec:
 apiVersion: auth.halo.run/v1alpha1
 kind: AuthProvider
 metadata:
+  name: google
+  labels:
+    auth.halo.run/auth-binding: "true"
+spec:
+  displayName: Google
+  description: Google LLC is an American multinational technology company that provides Google Sign-In via OAuth 2.0 / OpenID Connect.
+  logo: /plugins/plugin-oauth2/assets/static/google.svg
+  website: https://accounts.google.com
+  helpPage: https://developers.google.com/identity/protocols/oauth2/openid-connect
+  authenticationUrl: /oauth2/authorization/google
+  bindingUrl: /oauth2/authorization/google
+  unbindUrl: /apis/uc.api.auth.halo.run/v1alpha1/user-connections/google/disconnect
+  authType: oauth2
+  settingRef:
+    name: generic-oauth2-setting
+    group: genericOauth
+  configMapRef:
+    name: oauth2-google-config
+---
+apiVersion: auth.halo.run/v1alpha1
+kind: AuthProvider
+metadata:
   name: gitee
   labels:
     auth.halo.run/auth-binding: "true"
@@ -61,6 +83,28 @@ spec:
     group: genericOauth
   configMapRef:
     name: oauth2-gitlab-config
+---
+apiVersion: auth.halo.run/v1alpha1
+kind: AuthProvider
+metadata:
+  name: linuxdo
+  labels:
+    auth.halo.run/auth-binding: "true"
+spec:
+  displayName: LINUX DO
+  description: LINUX DO is a community forum that provides LINUX DO Connect for sharing forum user information via OAuth 2.0 / OpenID Connect.
+  logo: /plugins/plugin-oauth2/assets/static/linuxdo.svg
+  website: https://linux.do
+  helpPage: https://wiki.linux.do/Community/LinuxDoConnect
+  authenticationUrl: /oauth2/authorization/linuxdo
+  bindingUrl: /oauth2/authorization/linuxdo
+  unbindUrl: /apis/uc.api.auth.halo.run/v1alpha1/user-connections/linuxdo/disconnect
+  authType: oauth2
+  settingRef:
+    name: generic-oauth2-setting
+    group: genericOauth
+  configMapRef:
+    name: oauth2-linuxdo-config
 ---
 apiVersion: auth.halo.run/v1alpha1
 kind: AuthProvider
