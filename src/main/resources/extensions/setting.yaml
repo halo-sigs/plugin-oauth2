@@ -69,3 +69,27 @@ spec:
           name: jwkSetUri
           label: "JWK Set URI"
           help: "The URL to the JWK Set (KEYS) of the OpenID Connect Provider."
+---
+apiVersion: v1alpha1
+kind: Setting
+metadata:
+  name: logto-oauth2-setting
+spec:
+  forms:
+    - group: logtoOauth
+      label: "Logto OAuth 配置"
+      formSchema:
+        - $formkit: text
+          name: clientId
+          label: "Client ID"
+          validation: required:trim
+        - $formkit: password
+          name: clientSecret
+          label: "Client Secret"
+          validation: required:trim
+        - $formkit: text
+          name: endpoint
+          label: "Endpoint"
+          validation: required:trim
+          value: "https://example.logto.app"
+          help: "填写 Logto 域名、Issuer 或 OIDC 端点，例如 https://auth.example.com、https://auth.example.com/oidc 或 https://auth.example.com/oidc/auth。"

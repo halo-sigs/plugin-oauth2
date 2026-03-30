@@ -8,6 +8,7 @@ import net.minidev.json.JSONObject;
 import org.springframework.http.client.reactive.ReactorClientHttpConnector;
 import org.springframework.security.authentication.DelegatingReactiveAuthenticationManager;
 import org.springframework.security.core.AuthenticationException;
+import org.springframework.security.oauth2.client.registration.ClientRegistration;
 import org.springframework.security.oauth2.client.authentication.OAuth2LoginReactiveAuthenticationManager;
 import org.springframework.security.oauth2.client.endpoint.WebClientReactiveAuthorizationCodeTokenResponseClient;
 import org.springframework.security.oauth2.client.oidc.authentication.OidcAuthorizationCodeReactiveAuthenticationManager;
@@ -42,6 +43,7 @@ import run.halo.app.security.AuthenticationSecurityWebFilter;
 @Component
 public class HaloOAuth2AuthenticationWebFilter implements AuthenticationSecurityWebFilter {
 
+    static final String JWS_ALGORITHM_METADATA_KEY = "jwsAlgorithm";
     private final WebFilter delegate;
 
     public HaloOAuth2AuthenticationWebFilter(Oauth2LoginConfiguration configuration,
@@ -83,25 +85,9 @@ public class HaloOAuth2AuthenticationWebFilter implements AuthenticationSecurity
             new OidcReactiveOAuth2UserService()
         );
         var oidcIdTokenDecodeFactory = new ReactiveOidcIdTokenDecoderFactory();
-        oidcIdTokenDecodeFactory.setJwsAlgorithmResolver(clientRegistration -> {
-            var configurationMetadata = clientRegistration.getProviderDetails()
-                .getConfigurationMetadata();
-            try {
-                var supportedJwsAlgorithms = JSONObjectUtils.getStringList(
-                    new JSONObject(configurationMetadata),
-                    "id_token_signing_alg_values_supported"
-                );
-                // we choose the first one as JWS algorithm
-                if (!supportedJwsAlgorithms.isEmpty()) {
-                    var jwsAlgorithm = supportedJwsAlgorithms.get(0);
-                    return SignatureAlgorithm.from(jwsAlgorithm);
-                }
-            } catch (ParseException e) {
-                // ignore the error.
-            }
-            // default algorithm
-            return SignatureAlgorithm.RS256;
-        });
+        oidcIdTokenDecodeFactory.setJwsAlgorithmResolver(
+            HaloOAuth2AuthenticationWebFilter::resolveJwsAlgorithm
+        );
         oidcAuthManager.setJwtDecoderFactory(oidcIdTokenDecodeFactory);
         var authManager =
             new DelegatingReactiveAuthenticationManager(oauth2AuthManager, oidcAuthManager);
@@ -136,4 +122,27 @@ public class HaloOAuth2AuthenticationWebFilter implements AuthenticationSecurity
         return delegate.filter(exchange, chain);
     }
 
+    static SignatureAlgorithm resolveJwsAlgorithm(ClientRegistration clientRegistration) {
+        var configurationMetadata = clientRegistration.getProviderDetails()
+            .getConfigurationMetadata();
+        var configuredJwsAlgorithm = configurationMetadata.get(JWS_ALGORITHM_METADATA_KEY);
+        if (configuredJwsAlgorithm instanceof String jwsAlgorithm
+            && StringUtils.hasText(jwsAlgorithm)) {
+            return SignatureAlgorithm.from(jwsAlgorithm);
+        }
+        try {
+            var supportedJwsAlgorithms = JSONObjectUtils.getStringList(
+                new JSONObject(configurationMetadata),
+                "id_token_signing_alg_values_supported"
+            );
+            // we choose the first one as JWS algorithm
+            if (!supportedJwsAlgorithms.isEmpty()) {
+                return SignatureAlgorithm.from(supportedJwsAlgorithms.get(0));
+            }
+        } catch (ParseException | IllegalArgumentException e) {
+            log.debug("Failed to resolve JWS algorithm from provider metadata.", e);
+        }
+        // default algorithm
+        return SignatureAlgorithm.RS256;
+    }
 }

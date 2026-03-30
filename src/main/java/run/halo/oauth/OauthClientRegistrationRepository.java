@@ -38,7 +38,9 @@ import run.halo.app.infra.utils.JsonUtils;
 @RequiredArgsConstructor
 public class OauthClientRegistrationRepository implements ReactiveClientRegistrationRepository {
     static final String DEFAULT_REDIRECT_URL = "{baseUrl}/{action}/oauth2/code/{registrationId}";
-    static final String SSO_PROVIDER_NAME = "sso";
+    static final String ADVANCED_OIDC_SETTING_GROUP = "ssoOauth";
+    static final String LOGTO_SETTING_GROUP = "logtoOauth";
+    static final String JWS_ALGORITHM_METADATA_KEY = "jwsAlgorithm";
     private final ReactiveExtensionClient client;
     private final ExternalUrlSupplier externalUrlSupplier;
 
@@ -74,7 +76,20 @@ public class OauthClientRegistrationRepository implements ReactiveClientRegistra
             )
             .flatMap(data -> {
                 String value = data.getOrDefault(group, "{}");
-                if (SSO_PROVIDER_NAME.equals(name)) {
+                if (LOGTO_SETTING_GROUP.equals(group)) {
+                    if (StringUtils.isBlank(value) || "{}".equals(value.trim())) {
+                        String legacyValue = data.getOrDefault(ADVANCED_OIDC_SETTING_GROUP, "{}");
+                        if (!"{}".equals(legacyValue.trim())) {
+                            SsoClientConf ssoClientConf =
+                                JsonUtils.jsonToObject(legacyValue, SsoClientConf.class);
+                            return SsoClientRegistration(ssoClientConf, authProvider);
+                        }
+                    }
+                    LogtoClientConf logtoClientConf =
+                        JsonUtils.jsonToObject(value, LogtoClientConf.class);
+                    return LogtoClientRegistration(logtoClientConf, authProvider);
+                }
+                if (ADVANCED_OIDC_SETTING_GROUP.equals(group)) {
                     SsoClientConf ssoClientConf =
                         JsonUtils.jsonToObject(value, SsoClientConf.class);
                     return SsoClientRegistration(ssoClientConf, authProvider);
@@ -104,6 +119,27 @@ public class OauthClientRegistrationRepository implements ReactiveClientRegistra
                 oauth2ClientRegistration)
                 .clientId(genericClientConf.clientId())
                 .clientSecret(genericClientConf.clientSecret())
+                .build()
+            );
+    }
+
+    private Mono<ClientRegistration> LogtoClientRegistration(LogtoClientConf logtoClientConf,
+        AuthProvider authProvider) {
+        String registrationId = authProvider.getMetadata().getName();
+        var issuerUri = normalizeLogtoIssuerUri(logtoClientConf.endpoint());
+        return client.fetch(Oauth2ClientRegistration.class, registrationId)
+            .switchIfEmpty(Mono.error(new NotFoundException(
+                "Oauth2 client registration " + registrationId + " not found")
+            ))
+            .map(oauth2ClientRegistration -> clientRegistrationBuilder(oauth2ClientRegistration)
+                .clientId(logtoClientConf.clientId())
+                .clientSecret(logtoClientConf.clientSecret())
+                .authorizationUri(issuerUri + "/auth")
+                .tokenUri(issuerUri + "/token")
+                .userInfoUri(issuerUri + "/me")
+                .jwkSetUri(issuerUri + "/jwks")
+                .issuerUri(issuerUri)
+                .userNameAttributeName("sub")
                 .build()
             );
     }
@@ -153,6 +189,20 @@ public class OauthClientRegistrationRepository implements ReactiveClientRegistra
             }
             if (StringUtils.isBlank(clientSecret)) {
                 throw new IllegalArgumentException("clientSecret must not be blank");
+            }
+        }
+    }
+
+    record LogtoClientConf(String clientId, String clientSecret, String endpoint) {
+        LogtoClientConf {
+            if (StringUtils.isBlank(clientId)) {
+                throw new IllegalArgumentException("clientId must not be blank");
+            }
+            if (StringUtils.isBlank(clientSecret)) {
+                throw new IllegalArgumentException("clientSecret must not be blank");
+            }
+            if (StringUtils.isBlank(endpoint)) {
+                throw new IllegalArgumentException("endpoint must not be blank");
             }
         }
     }
@@ -239,10 +289,27 @@ public class OauthClientRegistrationRepository implements ReactiveClientRegistra
                 toAuthenticationMethod(spec.getUserInfoAuthenticationMethod())
             )
             .userInfoUri(spec.getUserInfoUri())
-            .providerConfigurationMetadata(
-                defaultIfNull(spec.getConfigurationMetadata(), Map.of())
-            )
+            .providerConfigurationMetadata(buildProviderConfigurationMetadata(spec))
             .userNameAttributeName(spec.getUserNameAttributeName());
+    }
+
+    private Map<String, Object> buildProviderConfigurationMetadata(
+        Oauth2ClientRegistration.Oauth2ClientRegistrationSpec spec) {
+        if (StringUtils.isBlank(spec.getJwsAlgorithm())) {
+            return Map.of();
+        }
+        return Map.of(JWS_ALGORITHM_METADATA_KEY, spec.getJwsAlgorithm());
+    }
+
+    private String normalizeLogtoIssuerUri(String endpoint) {
+        String normalized = StringUtils.removeEnd(endpoint.trim(), "/");
+        for (String suffix : List.of("/auth", "/token", "/me", "/jwks")) {
+            normalized = StringUtils.removeEnd(normalized, suffix);
+        }
+        if (!normalized.endsWith("/oidc")) {
+            normalized = normalized + "/oidc";
+        }
+        return normalized;
     }
 
     Mono<Set<String>> fetchEnabledProviders() {

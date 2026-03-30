@@ -3,7 +3,6 @@ package run.halo.oauth;
 import static io.swagger.v3.oas.annotations.media.Schema.RequiredMode.REQUIRED;
 
 import io.swagger.v3.oas.annotations.media.Schema;
-import java.util.Map;
 import java.util.Set;
 import lombok.Data;
 import lombok.EqualsAndHashCode;
@@ -54,7 +53,7 @@ public class Oauth2ClientRegistration extends AbstractExtension {
 
         private String issuerUri;
 
-        private Map<String, Object> configurationMetadata;
+        private String jwsAlgorithm;
 
         private String clientName;
     }

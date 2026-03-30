@@ -81,3 +81,25 @@ spec:
     group: ssoOauth
   configMapRef:
     name: oauth2-sso-config
+---
+apiVersion: auth.halo.run/v1alpha1
+kind: AuthProvider
+metadata:
+  name: logto
+  labels:
+    auth.halo.run/auth-binding: "true"
+spec:
+  displayName: Logto
+  description: Logto is an open-source identity infrastructure for customer and workforce authentication.
+  logo: /plugins/plugin-oauth2/assets/static/logto.svg
+  website: https://logto.io
+  helpPage: https://docs.logto.io/
+  authenticationUrl: /oauth2/authorization/logto
+  bindingUrl: /oauth2/authorization/logto
+  unbindUrl: /apis/uc.api.auth.halo.run/v1alpha1/user-connections/logto/disconnect
+  authType: oauth2
+  settingRef:
+    name: logto-oauth2-setting
+    group: logtoOauth
+  configMapRef:
+    name: oauth2-logto-config
