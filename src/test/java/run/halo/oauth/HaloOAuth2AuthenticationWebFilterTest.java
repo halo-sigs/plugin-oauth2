@@ -19,23 +19,51 @@ import org.springframework.security.oauth2.core.endpoint.OAuth2AuthorizationRequ
 import org.springframework.security.web.server.context.ServerSecurityContextRepository;
 import org.springframework.security.web.server.savedrequest.WebSessionServerRequestCache;
 import org.springframework.security.web.server.util.matcher.PathPatternParserServerWebExchangeMatcher;
+import org.springframework.util.unit.DataSize;
 import org.springframework.web.server.WebFilterChain;
 import reactor.core.publisher.Mono;
 import reactor.netty.http.server.HttpServer;
 
 class HaloOAuth2AuthenticationWebFilterTest {
 
+    private static final int LARGE_HEADER_SIZE = 9000;
+
     @Test
     void supportsTokenResponseHeadersLargerThan8192Bytes() {
+        var location = login(true, false, new OAuth2Properties());
+        assertThat(location).isEqualTo("/uc");
+    }
+
+    @Test
+    void supportsUserInfoResponseHeadersLargerThan8192Bytes() {
+        var location = login(false, true, new OAuth2Properties());
+        assertThat(location).isEqualTo("/uc");
+    }
+
+    @Test
+    void shouldRespectConfiguredMaxResponseHeaderSize() {
+        var properties = new OAuth2Properties();
+        properties.setMaxResponseHeaderSize(DataSize.ofKilobytes(8));
+        var location = login(false, true, properties);
+        assertThat(location).isEqualTo("/login?oauth2_error");
+    }
+
+    private String login(boolean largeTokenHeader, boolean largeUserInfoHeader,
+        OAuth2Properties properties) {
         var server = HttpServer.create()
             .port(0)
             .handle((request, response) -> {
                 response.responseHeaders().set(HttpHeaders.CONTENT_TYPE, MediaType.APPLICATION_JSON);
                 if (request.uri().startsWith("/token")) {
-                    response.addHeader("X-Large-Header", "x".repeat(9000));
+                    if (largeTokenHeader) {
+                        response.addHeader("X-Large-Header", "x".repeat(LARGE_HEADER_SIZE));
+                    }
                     return response.sendString(Mono.just("""
                         {"access_token":"test-token","token_type":"bearer","scope":"read:user"}
                         """));
+                }
+                if (largeUserInfoHeader) {
+                    response.addHeader("X-Large-Header", "x".repeat(LARGE_HEADER_SIZE));
                 }
                 return response.sendString(Mono.just("""
                     {"id":123,"login":"octocat"}
@@ -69,7 +97,7 @@ class HaloOAuth2AuthenticationWebFilterTest {
             var securityContextRepository = mock(ServerSecurityContextRepository.class);
             when(securityContextRepository.save(any(), any())).thenReturn(Mono.empty());
             var filter = new HaloOAuth2AuthenticationWebFilter(configuration,
-                securityContextRepository, new OAuth2Properties());
+                securityContextRepository, properties);
 
             var exchange = MockServerWebExchange.from(MockServerHttpRequest
                 .get("/login/oauth2/code/github?code=test-code&state=test-state"));
@@ -87,8 +115,7 @@ class HaloOAuth2AuthenticationWebFilterTest {
             when(chain.filter(any())).thenReturn(Mono.empty());
             filter.filter(exchange, chain).block(Duration.ofSeconds(5));
 
-            assertThat(exchange.getResponse().getHeaders().getFirst(HttpHeaders.LOCATION))
-                .isEqualTo("/uc");
+            return exchange.getResponse().getHeaders().getFirst(HttpHeaders.LOCATION);
         } finally {
             server.disposeNow();
         }
