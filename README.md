@@ -41,7 +41,11 @@ oauth2:
     username: "proxy-username" # 代理服务器用户名（可选）
     password: "proxy-password"  # 代理服务器密码（可选）
     connect-timeout-millis: 10000 # 连接超时时间，单位：毫秒（可选）
+  # OAuth2/OIDC 服务响应头的最大大小（可选），默认 32KB
+  max-response-header-size: 32KB
 ```
+
+代理与响应头大小限制会同时作用于获取 Token 与获取用户信息的请求。
 
 ## 开发环境
 

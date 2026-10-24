@@ -5,6 +5,7 @@ import lombok.Data;
 import org.springframework.boot.context.properties.ConfigurationProperties;
 import org.springframework.boot.context.properties.NestedConfigurationProperty;
 import org.springframework.util.StringUtils;
+import org.springframework.util.unit.DataSize;
 import org.springframework.validation.Errors;
 import org.springframework.validation.Validator;
 import org.springframework.validation.annotation.Validated;
@@ -18,6 +19,12 @@ public class OAuth2Properties implements Validator {
     @NestedConfigurationProperty
     private final Proxy proxy = new Proxy();
 
+    /**
+     * The maximum size of response headers returned by OAuth2/OIDC providers.
+     * Defaults to 32 KiB because some providers (e.g. GitHub) may exceed the default 8 KiB.
+     */
+    private DataSize maxResponseHeaderSize = DataSize.ofKilobytes(32);
+
     @Override
     public boolean supports(Class<?> clazz) {
         return OAuth2Properties.class == clazz;
@@ -26,6 +33,12 @@ public class OAuth2Properties implements Validator {
     @Override
     public void validate(Object target, Errors errors) {
         var properties = (OAuth2Properties) target;
+        var maxResponseHeaderSize = properties.getMaxResponseHeaderSize();
+        if (maxResponseHeaderSize == null || maxResponseHeaderSize.toBytes() <= 0
+            || maxResponseHeaderSize.toBytes() > Integer.MAX_VALUE) {
+            errors.rejectValue("maxResponseHeaderSize", "Invalid max response header size",
+                "Max response header size must be greater than zero and less than 2 GiB");
+        }
         var p = properties.getProxy();
         if (p.isEnabled()) {
             if (p.getPort() <= 0 || p.getPort() > 65535) {

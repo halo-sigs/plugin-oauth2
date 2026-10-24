@@ -42,45 +42,33 @@ import run.halo.app.security.AuthenticationSecurityWebFilter;
 @Component
 public class HaloOAuth2AuthenticationWebFilter implements AuthenticationSecurityWebFilter {
 
+    private static final int CONNECT_TIMEOUT_MILLIS = 15_000;
+
     private final WebFilter delegate;
 
     public HaloOAuth2AuthenticationWebFilter(Oauth2LoginConfiguration configuration,
         ServerSecurityContextRepository securityContextRepository,
         OAuth2Properties oAuth2Properties) {
 
-        var proxy = oAuth2Properties.getProxy();
-        var client = HttpClient.create()
-            .option(ChannelOption.CONNECT_TIMEOUT_MILLIS, 15_000);
-        if (proxy.isEnabled()) {
-            client = client.proxy(typeSpec -> {
-                    var builder = typeSpec.type(ProxyProvider.Proxy.HTTP)
-                        .host(proxy.getHost())
-                        .port(proxy.getPort());
-                    if (StringUtils.hasText(proxy.getUsername())) {
-                        builder.username(proxy.getUsername())
-                            .password(u -> proxy.getPassword());
-                    }
-                    if (proxy.getConnectTimeoutMillis() != null
-                        && proxy.getConnectTimeoutMillis() > 0) {
-                        builder.connectTimeoutMillis(proxy.getConnectTimeoutMillis());
-                    }
-                }
-            );
-        }
-        var webClient = WebClient.builder()
-            .clientConnector(new ReactorClientHttpConnector(client))
-            .build();
+        // Share one WebClient for all outbound OAuth2/OIDC requests (token, user info), so that
+        // the proxy, connect timeout and max response header size apply consistently.
+        var webClient = createWebClient(oAuth2Properties);
 
         var accessTokenResponseClient = new WebClientReactiveAuthorizationCodeTokenResponseClient();
         accessTokenResponseClient.setWebClient(webClient);
 
+        var oauth2UserService = new DefaultReactiveOAuth2UserService();
+        oauth2UserService.setWebClient(webClient);
+        var oidcUserService = new OidcReactiveOAuth2UserService();
+        oidcUserService.setOauth2UserService(oauth2UserService);
+
         var oauth2AuthManager = new OAuth2LoginReactiveAuthenticationManager(
             accessTokenResponseClient,
-            new DefaultReactiveOAuth2UserService()
+            oauth2UserService
         );
         var oidcAuthManager = new OidcAuthorizationCodeReactiveAuthenticationManager(
             accessTokenResponseClient,
-            new OidcReactiveOAuth2UserService()
+            oidcUserService
         );
         var oidcIdTokenDecodeFactory = new ReactiveOidcIdTokenDecoderFactory();
         oidcIdTokenDecodeFactory.setJwsAlgorithmResolver(clientRegistration -> {
@@ -134,6 +122,39 @@ public class HaloOAuth2AuthenticationWebFilter implements AuthenticationSecurity
     @Override
     public Mono<Void> filter(ServerWebExchange exchange, WebFilterChain chain) {
         return delegate.filter(exchange, chain);
+    }
+
+    static WebClient createWebClient(OAuth2Properties oAuth2Properties) {
+        return WebClient.builder()
+            .clientConnector(new ReactorClientHttpConnector(createHttpClient(oAuth2Properties)))
+            .build();
+    }
+
+    static HttpClient createHttpClient(OAuth2Properties oAuth2Properties) {
+        // Some providers (e.g. GitHub) may return response headers larger than the default
+        // 8 KiB limit of Reactor Netty.
+        var maxHeaderSize = Math.toIntExact(oAuth2Properties.getMaxResponseHeaderSize().toBytes());
+        var client = HttpClient.create()
+            .httpResponseDecoder(spec -> spec.maxHeaderSize(maxHeaderSize))
+            .option(ChannelOption.CONNECT_TIMEOUT_MILLIS, CONNECT_TIMEOUT_MILLIS);
+        var proxy = oAuth2Properties.getProxy();
+        if (proxy.isEnabled()) {
+            client = client.proxy(typeSpec -> {
+                    var builder = typeSpec.type(ProxyProvider.Proxy.HTTP)
+                        .host(proxy.getHost())
+                        .port(proxy.getPort());
+                    if (StringUtils.hasText(proxy.getUsername())) {
+                        builder.username(proxy.getUsername())
+                            .password(u -> proxy.getPassword());
+                    }
+                    if (proxy.getConnectTimeoutMillis() != null
+                        && proxy.getConnectTimeoutMillis() > 0) {
+                        builder.connectTimeoutMillis(proxy.getConnectTimeoutMillis());
+                    }
+                }
+            );
+        }
+        return client;
     }
 
 }
