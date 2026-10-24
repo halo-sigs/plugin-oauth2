@@ -50,6 +50,7 @@ public class HaloOAuth2AuthenticationWebFilter implements AuthenticationSecurity
 
         var proxy = oAuth2Properties.getProxy();
         var client = HttpClient.create()
+            .httpResponseDecoder(spec -> spec.maxHeaderSize(16 * 1024))
             .option(ChannelOption.CONNECT_TIMEOUT_MILLIS, 15_000);
         if (proxy.isEnabled()) {
             client = client.proxy(typeSpec -> {
